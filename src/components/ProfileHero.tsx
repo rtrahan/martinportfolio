@@ -13,6 +13,7 @@ export interface ProfileData {
   contact: { email: string; phone?: string };
   locations: string[];
   photo?: string | null;
+  splatUrl?: string | null;
   bio: string;
   accolades: ProfileAccolade[];
 }

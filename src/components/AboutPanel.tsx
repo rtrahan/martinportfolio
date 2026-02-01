@@ -6,7 +6,7 @@ export interface ProfileAccolade {
 }
 
 /**
- * About page right panel: name, locations, bio, then Experience and Skills (no Certifications — those go at bottom).
+ * About page right panel: name, locations, bio, Experience, Skills, Contact, then Certifications at bottom.
  */
 export function AboutPanel({
   name,
@@ -14,12 +14,14 @@ export function AboutPanel({
   bio,
   contact,
   accoladesExcludingCertifications,
+  certifications,
 }: {
   name: string;
   locations: string[];
   bio: string;
   contact: { email: string; phone?: string };
   accoladesExcludingCertifications: ProfileAccolade[];
+  certifications: string[];
 }) {
   return (
     <aside
@@ -81,6 +83,23 @@ export function AboutPanel({
               </p>
             )}
           </div>
+
+          {/* Certifications at bottom of detail text */}
+          {certifications.length > 0 && (
+            <div className="pt-8 border-t border-stone-200 dark:border-white/10">
+              <h2 className="text-[10px] font-sans font-medium tracking-[0.2em] text-stone-500 uppercase mb-3">
+                Certifications
+              </h2>
+              <ul className="space-y-2">
+                {certifications.map((item, i) => (
+                  <li key={i} className="text-stone-600 dark:text-stone-300 text-sm md:text-base leading-relaxed flex gap-2">
+                    <span className="text-stone-500 mt-1.5 flex-shrink-0">·</span>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
       </div>
     </aside>

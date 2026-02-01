@@ -6,7 +6,8 @@
     "phone": "845.270.2534"
   },
   "locations": ["NYC", "Martha's Vineyard"],
-  "photo": "/images/martin-profile.jpg",
+  "photo": "/images/portrait.png",
+  "splatUrl": "/splat/portrait.splat",
   "bio": "With 18 years of hands-on experience in construction, Martin brings a practical, field-tested perspective to drafting and design. His work spans every stage of building—from site planning and conceptual layout to excavation, framing, and finish carpentry. He grew up working in the trades, performing physically demanding tasks and solving problems on active job sites, which instilled a deep respect for the craft. That background gives him a working understanding of tools, materials, sequencing, and constructability; in his practice, manual labor is not separate from design. He specializes in residential construction and custom homes, integrating structural, mechanical, and civil principles, and his work bridges the gap between design intent and construction execution. He is proficient in CAD, Revit, and construction documentation, producing drawings that meet industry standards and are grounded in real-world constructability.",
   "accolades": [
     {

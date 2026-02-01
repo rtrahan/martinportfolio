@@ -762,7 +762,21 @@ async function main() {
 
     const rowLength = 3 * 4 + 3 * 4 + 4 + 4;
     const reader = req.body.getReader();
-    let splatData = new Uint8Array(req.headers.get("content-length"));
+    // Don't rely on Content-Length: in production (Vercel/CDN) it may be missing (chunked) or wrong (compressed)
+    const chunks = [];
+    let totalLength = 0;
+    while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        chunks.push(value);
+        totalLength += value.length;
+    }
+    const splatData = new Uint8Array(totalLength);
+    let offset = 0;
+    for (const chunk of chunks) {
+        splatData.set(chunk, offset);
+        offset += chunk.length;
+    }
 
     const downsample =
         splatData.length / rowLength > 500000 ? 1 : 1 / devicePixelRatio;
@@ -1157,18 +1171,9 @@ async function main() {
     
     // Zoom control
     let userZoom = 0;
-    const minZoom = -2.0; // Allow getting closer (smaller value = closer if base is 3.0? No, larger zoom = further back?)
-    // In current logic: translate4(..., zoom). Identity cam at 0,0,0. Translate(0,0,zoom) moves camera to Z=zoom.
-    // If zoom=3.0, camera is at Z=3. Object is at 0? Wait, Identity looks down -Z.
-    // If I put camera at Z=3, looking -Z, I see Z=0.
-    // If zoom increases (e.g. 10), camera at Z=10. Further away.
-    // If zoom decreases (e.g. 0), camera at Z=0. Inside object?
-    // So:
-    // Zoom IN -> Decrease zoom value.
-    // Zoom OUT -> Increase zoom value.
-    
-    const maxZoom = 10.0; // Don't go too far
-    const zoomLimitIn = -2.0; // Don't go inside
+    // Limited scroll zoom range (like building images), not infinite
+    const zoomLimitIn = -1.5;  // Max zoom IN (offset from base)
+    const zoomLimitOut = 2.0;  // Max zoom OUT
 
     const updateMouse = (x, y) => {
         targetMx = x;
@@ -1341,37 +1346,14 @@ async function main() {
         selectFile(e.dataTransfer.files[0]);
     });
 
-    let bytesRead = 0;
-    let lastVertexCount = -1;
-    let stopLoading = false;
-
-    while (true) {
-        const { done, value } = await reader.read();
-        if (done || stopLoading) break;
-
-        splatData.set(value, bytesRead);
-        bytesRead += value.length;
-
-        if (vertexCount > lastVertexCount) {
-            if (!isPly(splatData)) {
-                worker.postMessage({
-                    buffer: splatData.buffer,
-                    vertexCount: Math.floor(bytesRead / rowLength),
-                });
-            }
-            lastVertexCount = vertexCount;
-        }
-    }
-    if (!stopLoading) {
-        if (isPly(splatData)) {
-            // ply file magic header means it should be handled differently
-            worker.postMessage({ ply: splatData.buffer, save: false });
-        } else {
-            worker.postMessage({
-                buffer: splatData.buffer,
-                vertexCount: Math.floor(bytesRead / rowLength),
-            });
-        }
+    // Body already read above; post full splat data to worker
+    if (isPly(splatData)) {
+        worker.postMessage({ ply: splatData.buffer, save: false });
+    } else {
+        worker.postMessage({
+            buffer: splatData.buffer,
+            vertexCount: Math.floor(splatData.length / rowLength),
+        });
     }
 }
 
