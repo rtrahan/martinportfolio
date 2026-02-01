@@ -1,11 +1,11 @@
 'use client';
 
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useEffect, useState, useRef } from 'react';
 
 /** 
  * 3D Gaussian splat viewer with parallax effect.
  * Uses antimatter15/splat iframe viewer for reliability.
- * Progressive loading: shows fallback immediately, fades to splat when ready.
+ * Shows splat loading progressively - you can watch it build up as data arrives.
  */
 export function Viewer3D({
   splatUrl,
@@ -27,31 +27,8 @@ export function Viewer3D({
   const [iframeUrl, setIframeUrl] = useState<string | null>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [mousePos, setMousePos] = useState({ x: 0.5, y: 0.5 });
-  
-  // Progressive loading state
-  const [splatLoaded, setSplatLoaded] = useState(false);
-  const [loadProgress, setLoadProgress] = useState(0);
 
   const useSplat = splatUrl && splatUrl.length > 0;
-  const hasFallback = fallbackMediaUrl && fallbackMediaUrl.length > 0;
-  
-  // Show fallback while splat loads (progressive loading)
-  const showFallback = hasFallback && (!splatLoaded || !useSplat);
-  const showSplat = useSplat && mounted && iframeUrl;
-
-  // Listen for splat load completion from iframe
-  const handleMessage = useCallback((e: MessageEvent) => {
-    if (e.data?.type === 'splat_loaded') {
-      setSplatLoaded(true);
-    } else if (e.data?.type === 'splat_progress') {
-      setLoadProgress(e.data.progress || 0);
-    }
-  }, []);
-
-  useEffect(() => {
-    window.addEventListener('message', handleMessage);
-    return () => window.removeEventListener('message', handleMessage);
-  }, [handleMessage]);
 
   // Only run on client after mount to avoid hydration mismatch
   useEffect(() => {
@@ -117,7 +94,7 @@ export function Viewer3D({
   const gradX = parallax ? 50 + (mousePos.x - 0.5) * 5 : 50;
   const gradY = parallax ? 60 + (mousePos.y - 0.5) * 5 : 60;
 
-  // --- No splat, just fallback ---
+  // --- No splat, just fallback image ---
   if (!useSplat) {
     if (fallbackMediaUrl) {
       const isVideo = /\.(mp4|webm|mov)$/i.test(fallbackMediaUrl);
@@ -146,52 +123,16 @@ export function Viewer3D({
     );
   }
 
-  // --- Progressive loading: show fallback immediately, fade in splat when ready ---
-  const isVideo = fallbackMediaUrl ? /\.(mp4|webm|mov)$/i.test(fallbackMediaUrl) : false;
-  
+  // --- Splat viewer: shows progressive loading as data arrives ---
   return (
     <div className={`absolute inset-0 ${compact ? 'bg-transparent' : 'bg-stone-100 dark:bg-stone-900'}`}>
-      {/* Fallback layer — visible immediately, fades out when splat is ready */}
-      {showFallback && (
-        <div 
-          className={`absolute inset-0 z-10 transition-opacity duration-700 ease-out ${splatLoaded ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
-        >
-          {parallax ? (
-            <ParallaxImage src={fallbackMediaUrl!} isVideo={isVideo} />
-          ) : (
-            isVideo ? (
-              <video src={fallbackMediaUrl!} autoPlay loop muted playsInline className="w-full h-full object-cover" />
-            ) : (
-              <img src={fallbackMediaUrl!} alt="" className="w-full h-full object-cover" />
-            )
-          )}
-        </div>
-      )}
-      
-      {/* Loading indicator — only show if no fallback and not yet loaded */}
-      {!hasFallback && !splatLoaded && mounted && (
-        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center">
-          <div className="text-stone-500 dark:text-stone-500 font-mono text-sm tracking-widest animate-pulse">
-            LOADING 3D SCENE...
-          </div>
-          {loadProgress > 0 && loadProgress < 100 && (
-            <div className="mt-3 w-32 h-1 bg-stone-300 dark:bg-stone-700 rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-stone-500 dark:bg-stone-400 transition-all duration-300"
-                style={{ width: `${loadProgress}%` }}
-              />
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Splat iframe — loads in background, becomes visible when ready */}
-      {showSplat && (
+      {/* Splat iframe — visible immediately, renders progressively as data loads */}
+      {mounted && iframeUrl && (
         <iframe
           ref={iframeRef}
           title="3D Gaussian Splat Viewer"
           src={iframeUrl}
-          className={`absolute inset-0 w-full h-full border-0 transition-opacity duration-700 ease-out ${splatLoaded ? 'opacity-100' : 'opacity-0'}`}
+          className="absolute inset-0 w-full h-full border-0"
           allow="accelerometer; gyroscope"
         />
       )}
