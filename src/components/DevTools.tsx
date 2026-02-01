@@ -20,8 +20,13 @@ export function DevTools({ slug, hasSplat }: { slug: string, hasSplat: boolean }
         body: JSON.stringify({ slug }),
       });
       
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Failed');
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        if (res.status === 404) {
+          throw new Error('API not deployed. Run splat generation locally: see README.');
+        }
+        throw new Error(data.error || 'Failed');
+      }
       
       setMsg("Done! Reloading...");
       setTimeout(() => window.location.reload(), 1000);
