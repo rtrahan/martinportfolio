@@ -1257,8 +1257,15 @@ async function main() {
         const progress = (100 * vertexCount) / (splatData.length / rowLength);
         if (progress < 100) {
             document.getElementById("progress").style.width = progress + "%";
+            // Send progress updates to parent
+            window.parent.postMessage({ type: 'splat_progress', progress }, '*');
         } else {
             document.getElementById("progress").style.display = "none";
+            // Notify parent that splat is fully loaded and rendering
+            if (!window._splatLoadedSent) {
+                window._splatLoadedSent = true;
+                window.parent.postMessage({ type: 'splat_loaded' }, '*');
+            }
         }
         if (fps) fps.innerText = Math.round(avgFps) + " fps";
         if (isNaN(currentCameraIndex)) {

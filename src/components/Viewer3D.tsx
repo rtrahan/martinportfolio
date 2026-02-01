@@ -1,10 +1,11 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 
 /** 
  * 3D Gaussian splat viewer with parallax effect.
  * Uses antimatter15/splat iframe viewer for reliability.
+ * Progressive loading: shows fallback immediately, fades to splat when ready.
  */
 export function Viewer3D({
   splatUrl,
@@ -26,8 +27,31 @@ export function Viewer3D({
   const [iframeUrl, setIframeUrl] = useState<string | null>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [mousePos, setMousePos] = useState({ x: 0.5, y: 0.5 });
+  
+  // Progressive loading state
+  const [splatLoaded, setSplatLoaded] = useState(false);
+  const [loadProgress, setLoadProgress] = useState(0);
 
   const useSplat = splatUrl && splatUrl.length > 0;
+  const hasFallback = fallbackMediaUrl && fallbackMediaUrl.length > 0;
+  
+  // Show fallback while splat loads (progressive loading)
+  const showFallback = hasFallback && (!splatLoaded || !useSplat);
+  const showSplat = useSplat && mounted && iframeUrl;
+
+  // Listen for splat load completion from iframe
+  const handleMessage = useCallback((e: MessageEvent) => {
+    if (e.data?.type === 'splat_loaded') {
+      setSplatLoaded(true);
+    } else if (e.data?.type === 'splat_progress') {
+      setLoadProgress(e.data.progress || 0);
+    }
+  }, []);
+
+  useEffect(() => {
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, [handleMessage]);
 
   // Only run on client after mount to avoid hydration mismatch
   useEffect(() => {
@@ -93,7 +117,7 @@ export function Viewer3D({
   const gradX = parallax ? 50 + (mousePos.x - 0.5) * 5 : 50;
   const gradY = parallax ? 60 + (mousePos.y - 0.5) * 5 : 60;
 
-  // --- Fallback View (Image/Video) ---
+  // --- No splat, just fallback ---
   if (!useSplat) {
     if (fallbackMediaUrl) {
       const isVideo = /\.(mp4|webm|mov)$/i.test(fallbackMediaUrl);
@@ -122,38 +146,67 @@ export function Viewer3D({
     );
   }
 
-  // Show loading state until client mounts and URL is ready
-  if (!mounted || !iframeUrl) {
-    return (
-      <div className={`absolute inset-0 flex items-center justify-center ${compact ? 'bg-transparent' : 'bg-stone-100 dark:bg-stone-900'}`}>
-        <div className="text-stone-500 dark:text-stone-500 font-mono text-sm tracking-widest animate-pulse">
-          LOADING 3D SCENE...
-        </div>
-      </div>
-    );
-  }
+  // --- Progressive loading: show fallback immediately, fade in splat when ready ---
+  const isVideo = fallbackMediaUrl ? /\.(mp4|webm|mov)$/i.test(fallbackMediaUrl) : false;
   
   return (
     <div className={`absolute inset-0 ${compact ? 'bg-transparent' : 'bg-stone-100 dark:bg-stone-900'}`}>
-      <iframe
-        ref={iframeRef}
-        title="3D Gaussian Splat Viewer"
-        src={iframeUrl}
-        className="w-full h-full border-0"
-        allow="accelerometer; gyroscope"
-      />
+      {/* Fallback layer — visible immediately, fades out when splat is ready */}
+      {showFallback && (
+        <div 
+          className={`absolute inset-0 z-10 transition-opacity duration-700 ease-out ${splatLoaded ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+        >
+          {parallax ? (
+            <ParallaxImage src={fallbackMediaUrl!} isVideo={isVideo} />
+          ) : (
+            isVideo ? (
+              <video src={fallbackMediaUrl!} autoPlay loop muted playsInline className="w-full h-full object-cover" />
+            ) : (
+              <img src={fallbackMediaUrl!} alt="" className="w-full h-full object-cover" />
+            )
+          )}
+        </div>
+      )}
+      
+      {/* Loading indicator — only show if no fallback and not yet loaded */}
+      {!hasFallback && !splatLoaded && mounted && (
+        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center">
+          <div className="text-stone-500 dark:text-stone-500 font-mono text-sm tracking-widest animate-pulse">
+            LOADING 3D SCENE...
+          </div>
+          {loadProgress > 0 && loadProgress < 100 && (
+            <div className="mt-3 w-32 h-1 bg-stone-300 dark:bg-stone-700 rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-stone-500 dark:bg-stone-400 transition-all duration-300"
+                style={{ width: `${loadProgress}%` }}
+              />
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Splat iframe — loads in background, becomes visible when ready */}
+      {showSplat && (
+        <iframe
+          ref={iframeRef}
+          title="3D Gaussian Splat Viewer"
+          src={iframeUrl}
+          className={`absolute inset-0 w-full h-full border-0 transition-opacity duration-700 ease-out ${splatLoaded ? 'opacity-100' : 'opacity-0'}`}
+          allow="accelerometer; gyroscope"
+        />
+      )}
       
       {/* Portal Vignette — skip when compact so home grid is just splat */}
       {!compact && (
         <>
           <div
-            className="absolute inset-0 pointer-events-none transition-opacity duration-300 ease-out dark:opacity-0"
+            className="absolute inset-0 pointer-events-none transition-opacity duration-300 ease-out dark:opacity-0 z-20"
             style={{
               background: `radial-gradient(circle at ${gradX}% ${gradY}%, transparent 78%, rgba(250,250,249,0.4) 92%, #fafaf9 100%)`,
             }}
           />
           <div
-            className="absolute inset-0 pointer-events-none transition-opacity duration-300 ease-out opacity-0 dark:opacity-100"
+            className="absolute inset-0 pointer-events-none transition-opacity duration-300 ease-out opacity-0 dark:opacity-100 z-20"
             style={{
               background: `radial-gradient(circle at ${gradX}% ${gradY}%, transparent 78%, rgba(0,0,0,0.4) 92%, black 100%)`,
             }}
@@ -162,8 +215,8 @@ export function Viewer3D({
       )}
       {!compact && (
         <>
-          <div className="absolute inset-0 pointer-events-none shadow-[inset_0_0_150px_80px_rgba(0,0,0,0.08)] dark:shadow-[inset_0_0_150px_100px_black]" />
-          <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-stone-100/50 dark:from-stone-900/80 to-transparent pointer-events-none" />
+          <div className="absolute inset-0 pointer-events-none shadow-[inset_0_0_150px_80px_rgba(0,0,0,0.08)] dark:shadow-[inset_0_0_150px_100px_black] z-20" />
+          <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-stone-100/50 dark:from-stone-900/80 to-transparent pointer-events-none z-20" />
         </>
       )}
     </div>
