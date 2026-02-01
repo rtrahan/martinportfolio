@@ -8,16 +8,19 @@ import type { ProfileData } from '@/components/ProfileHero';
 export default function GalleryPage() {
   const projects = getAllProjects();
   const profile = profileData as ProfileData;
+  
+  // Only show projects that have fallback images (exclude "Details" which has no visual)
+  const visualProjects = projects.filter(p => p.fallbackMediaUrl);
 
   return (
     <div className="min-h-screen flex flex-col bg-stone-100 dark:bg-stone-900 text-stone-900 dark:text-stone-100">
-      {/* Above the fold: Martin's profile + accolades */}
+      {/* Above the fold: Martin's profile */}
       <ProfileHero profile={profile} />
 
-      {/* Grid of 3D splat scenes — dreamy portals with space between */}
-      <main id="projects" className="flex-1 w-full max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12 md:py-16 pb-20 sm:pb-24">
-        <div className="grid grid-cols-1 gap-8 sm:gap-12 md:gap-16 lg:gap-20">
-          {projects.map((project) => (
+      {/* Project grid — 2 columns on desktop, 1 on mobile */}
+      <main id="projects" className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 sm:pb-24">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
+          {visualProjects.map((project) => (
             <SplatCard key={project.slug} project={project} />
           ))}
         </div>

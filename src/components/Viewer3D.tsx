@@ -223,52 +223,133 @@ export function Viewer3D({
   );
 }
 
-// Helper for Parallax on the Fallback Image
+// Helper for Parallax on the Fallback Image (mouse, touch, and accelerometer)
 function ParallaxImage({ src, isVideo }: { src: string; isVideo: boolean }) {
   const [offset, setOffset] = useState({ x: 0, y: 0 });
+  const [permissionGranted, setPermissionGranted] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const updateOffset = (clientX: number, clientY: number) => {
-      const x = (clientX / window.innerWidth - 0.5) * 5;  // Very subtle
-      const y = (clientY / window.innerHeight - 0.5) * 5;
-      setOffset({ x: -x, y: -y });
+    let targetX = 0;
+    let targetY = 0;
+    let currentX = 0;
+    let currentY = 0;
+    let animationId: number;
+
+    // Smooth animation loop
+    const animate = () => {
+      currentX += (targetX - currentX) * 0.08;
+      currentY += (targetY - currentY) * 0.08;
+      setOffset({ x: currentX, y: currentY });
+      animationId = requestAnimationFrame(animate);
     };
-    const handleMove = (e: MouseEvent) => updateOffset(e.clientX, e.clientY);
+    animationId = requestAnimationFrame(animate);
+
+    const updateTarget = (x: number, y: number) => {
+      targetX = x * 8;  // Parallax intensity
+      targetY = y * 8;
+    };
+
+    // Mouse movement
+    const handleMove = (e: MouseEvent) => {
+      const x = (e.clientX / window.innerWidth - 0.5) * -1;
+      const y = (e.clientY / window.innerHeight - 0.5) * -1;
+      updateTarget(x, y);
+    };
+
+    // Touch movement
     const handleTouch = (e: TouchEvent) => {
-      if (e.touches.length > 0) updateOffset(e.touches[0].clientX, e.touches[0].clientY);
+      if (e.touches.length > 0) {
+        const x = (e.touches[0].clientX / window.innerWidth - 0.5) * -1;
+        const y = (e.touches[0].clientY / window.innerHeight - 0.5) * -1;
+        updateTarget(x, y);
+      }
     };
+
+    // Accelerometer / DeviceOrientation
+    const handleOrientation = (e: DeviceOrientationEvent) => {
+      if (e.gamma !== null && e.beta !== null) {
+        // gamma: left/right tilt (-90 to 90), beta: front/back tilt (-180 to 180)
+        const x = Math.max(-1, Math.min(1, e.gamma / 30));
+        const y = Math.max(-1, Math.min(1, (e.beta - 45) / 30)); // 45 is "neutral" holding angle
+        updateTarget(-x, -y);
+      }
+    };
+
     window.addEventListener('mousemove', handleMove);
     window.addEventListener('touchmove', handleTouch, { passive: true });
+
+    // Check if DeviceOrientationEvent needs permission (iOS 13+)
+    if (typeof DeviceOrientationEvent !== 'undefined') {
+      if (typeof (DeviceOrientationEvent as unknown as { requestPermission?: () => Promise<string> }).requestPermission === 'function') {
+        // iOS 13+ requires permission - we'll request on first touch
+        if (permissionGranted) {
+          window.addEventListener('deviceorientation', handleOrientation);
+        }
+      } else {
+        // Non-iOS or older iOS - just add listener
+        window.addEventListener('deviceorientation', handleOrientation);
+      }
+    }
+
     return () => {
+      cancelAnimationFrame(animationId);
       window.removeEventListener('mousemove', handleMove);
       window.removeEventListener('touchmove', handleTouch);
+      window.removeEventListener('deviceorientation', handleOrientation);
     };
+  }, [permissionGranted]);
+
+  // Request permission on first touch (iOS)
+  useEffect(() => {
+    const requestPermission = async () => {
+      if (typeof DeviceOrientationEvent !== 'undefined' && 
+          typeof (DeviceOrientationEvent as unknown as { requestPermission?: () => Promise<string> }).requestPermission === 'function') {
+        try {
+          const permission = await (DeviceOrientationEvent as unknown as { requestPermission: () => Promise<string> }).requestPermission();
+          if (permission === 'granted') {
+            setPermissionGranted(true);
+          }
+        } catch {
+          // Permission denied or error
+        }
+      }
+    };
+
+    const container = containerRef.current;
+    if (container) {
+      container.addEventListener('touchstart', requestPermission, { once: true, passive: true });
+      return () => container.removeEventListener('touchstart', requestPermission);
+    }
   }, []);
 
   const style = {
-    transform: `scale(1.1) translate(${offset.x}px, ${offset.y}px)`,
-    transition: 'transform 0.1s ease-out',
+    transform: `scale(1.15) translate(${offset.x}px, ${offset.y}px)`,
   };
 
   if (isVideo) {
     return (
-      <video
-        src={src}
-        autoPlay
-        loop
-        muted
-        playsInline
-        className="w-full h-full object-cover"
-        style={style}
-      />
+      <div ref={containerRef} className="w-full h-full">
+        <video
+          src={src}
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="w-full h-full object-cover transition-transform duration-100 ease-out"
+          style={style}
+        />
+      </div>
     );
   }
   return (
-    <img
-      src={src}
-      alt=""
-      className="w-full h-full object-cover"
-      style={style}
-    />
+    <div ref={containerRef} className="w-full h-full">
+      <img
+        src={src}
+        alt=""
+        className="w-full h-full object-cover transition-transform duration-100 ease-out"
+        style={style}
+      />
+    </div>
   );
 }
