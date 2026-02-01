@@ -5,54 +5,17 @@ import Link from 'next/link';
 import type { Project } from '@/types/project';
 import { Viewer3D } from '@/components/Viewer3D';
 
-/** Zoom out more on mobile so the full building is visible in the splat. */
-const MOBILE_BREAKPOINT = 640;
-const BASE_ZOOM_DESKTOP = -3;
-const BASE_ZOOM_MOBILE = -40;
-
 /**
- * A single project card in the grid: 3D splat (or fallback) that reacts to mouse/touch,
- * with title overlay. Links to project detail. Link is a full-size overlay so iframe/image
- * cannot capture clicks.
+ * A single project card in the grid: fallback image with parallax effect,
+ * title overlay. Links to project detail. Splats only load on project pages,
+ * not on the home page (saves ~180MB of downloads).
  */
 export function SplatCard({ project }: { project: Project }) {
   const href = `/project/${project.slug}`;
   const cardRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
-  // Default to mobile zoom so small screens get correct zoom on first paint (no flash)
-  const [baseZoom, setBaseZoom] = useState(BASE_ZOOM_MOBILE);
-  // Lazy load splat only when card is in view (speeds up mobile: no loading 5 splats at once)
-  const [inView, setInView] = useState(false);
-  // On mobile home, use fallback image only (splats are ~36MB each; avoid heavy load)
-  const [useFallbackOnly, setUseFallbackOnly] = useState(false);
 
-  useEffect(() => {
-    const updateZoom = () => {
-      setBaseZoom(window.innerWidth < MOBILE_BREAKPOINT ? BASE_ZOOM_MOBILE : BASE_ZOOM_DESKTOP);
-    };
-    updateZoom();
-    window.addEventListener('resize', updateZoom);
-    return () => window.removeEventListener('resize', updateZoom);
-  }, []);
-
-  useEffect(() => {
-    const isMobile = window.innerWidth < MOBILE_BREAKPOINT;
-    setUseFallbackOnly(isMobile);
-  }, []);
-
-  useEffect(() => {
-    if (!cardRef.current) return;
-    const el = cardRef.current;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) setInView(true);
-      },
-      { rootMargin: '100px', threshold: 0.01 }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
-
+  // Scroll-based zoom effect (desktop only)
   useEffect(() => {
     const handleScroll = () => {
       if (!cardRef.current) return;
@@ -76,24 +39,19 @@ export function SplatCard({ project }: { project: Project }) {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const loadSplat = inView && !useFallbackOnly;
-  const effectiveSplatUrl = loadSplat ? project.splatUrl : null;
-
   return (
     <div 
       ref={cardRef}
       className="group relative w-full aspect-[16/9] overflow-hidden bg-transparent focus-within:outline-none focus-within:ring-2 focus-within:ring-stone-400 dark:focus-within:ring-white/30 focus-within:ring-inset"
     >
-      {/* Splat only — radial vignette to blend edges into page (no hard rect) */}
+      {/* Fallback image with parallax — splats only load on project detail pages */}
       <div 
         className="absolute inset-0 z-0 transition-transform duration-300 ease-out"
         style={{ transform: `scale(${scale})` }}
       >
         <Viewer3D
-          splatUrl={effectiveSplatUrl}
           fallbackMediaUrl={project.fallbackMediaUrl}
           compact
-          baseZoom={baseZoom}
         />
       </div>
       {/* Radial vignette — circular, clear center, solid edges */}
