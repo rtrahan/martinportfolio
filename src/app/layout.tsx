@@ -25,6 +25,12 @@ export const metadata: Metadata = {
   description: "Portfolio of drafting and design work by Martin Braia Rodriguez.",
 };
 
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover" as const,
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -43,7 +49,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} ${cormorant.variable} antialiased bg-stone-100 dark:bg-stone-900 text-stone-900 dark:text-stone-100 selection:bg-orange-200 dark:selection:bg-orange-900`}
       >
         {children}
-        <div className="fixed top-4 right-4 z-50 md:top-6 md:right-6">
+        <div className="fixed top-4 right-4 z-50 md:top-6 md:right-6" style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))', paddingRight: 'max(1rem, env(safe-area-inset-right))' }}>
           <ThemeToggle />
         </div>
       </body>

@@ -5,6 +5,11 @@ import Link from 'next/link';
 import type { Project } from '@/types/project';
 import { Viewer3D } from '@/components/Viewer3D';
 
+/** Zoom out more on mobile so the full building is visible in the splat. */
+const MOBILE_BREAKPOINT = 640;
+const BASE_ZOOM_DESKTOP = -3;
+const BASE_ZOOM_MOBILE = -40;
+
 /**
  * A single project card in the grid: 3D splat (or fallback) that reacts to mouse/touch,
  * with title overlay. Links to project detail. Link is a full-size overlay so iframe/image
@@ -14,33 +19,38 @@ export function SplatCard({ project }: { project: Project }) {
   const href = `/project/${project.slug}`;
   const cardRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
+  // Default to mobile zoom so small screens get correct zoom on first paint (no flash)
+  const [baseZoom, setBaseZoom] = useState(BASE_ZOOM_MOBILE);
+
+  useEffect(() => {
+    const updateZoom = () => {
+      setBaseZoom(window.innerWidth < MOBILE_BREAKPOINT ? BASE_ZOOM_MOBILE : BASE_ZOOM_DESKTOP);
+    };
+    updateZoom();
+    window.addEventListener('resize', updateZoom);
+    return () => window.removeEventListener('resize', updateZoom);
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
       if (!cardRef.current) return;
-      
+      // Disable scroll-zoom on small screens for performance and simpler UX
+      if (window.innerWidth < 640) {
+        setScale(1);
+        return;
+      }
       const rect = cardRef.current.getBoundingClientRect();
       const windowHeight = window.innerHeight;
-      
-      // Calculate how far the card center is from viewport center
       const cardCenter = rect.top + rect.height / 2;
       const viewportCenter = windowHeight / 2;
       const distanceFromCenter = cardCenter - viewportCenter;
-      
-      // Normalize: when card is at center, distance is 0
-      // When card is at top/bottom of viewport, distance is +/- windowHeight/2
       const normalizedDistance = distanceFromCenter / (windowHeight / 2);
-      
-      // Scale: 1.0 at edges, up to 1.15 when centered
-      // As card approaches center (normalizedDistance -> 0), scale increases
       const newScale = 1 + (1 - Math.abs(normalizedDistance)) * 0.15;
-      
       setScale(Math.max(1, Math.min(1.15, newScale)));
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll(); // Initial calculation
-    
+    handleScroll();
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -58,7 +68,7 @@ export function SplatCard({ project }: { project: Project }) {
           splatUrl={project.splatUrl}
           fallbackMediaUrl={project.fallbackMediaUrl}
           compact
-          baseZoom={-3}
+          baseZoom={baseZoom}
         />
       </div>
       {/* Radial vignette — circular, clear center, solid edges */}
@@ -80,13 +90,13 @@ export function SplatCard({ project }: { project: Project }) {
       <div className="absolute inset-0 z-[1] pointer-events-none bg-gradient-to-b from-stone-100 dark:from-stone-900 via-transparent to-transparent" style={{ backgroundSize: '100% 40%', backgroundPosition: 'top', backgroundRepeat: 'no-repeat' }} />
       {/* Bottom gradient to hide bottom edge */}
       <div className="absolute inset-0 z-[1] pointer-events-none bg-gradient-to-t from-stone-100 dark:from-stone-900 via-transparent to-transparent" style={{ backgroundSize: '100% 40%', backgroundPosition: 'bottom', backgroundRepeat: 'no-repeat' }} />
-      {/* Title overlay — bottom */}
-      <div className="absolute inset-x-0 bottom-0 z-[1] flex flex-col items-center pb-12 md:pb-16 pointer-events-none">
-        <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif font-light text-stone-800 dark:text-white tracking-tight text-center leading-tight">
+      {/* Title overlay — bottom, lower for legibility over gradient */}
+      <div className="absolute inset-x-0 bottom-0 z-[1] flex flex-col items-center px-4 pb-4 sm:pb-6 md:pb-10 lg:pb-14 pointer-events-none">
+        <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-serif font-light text-stone-800 dark:text-white tracking-tight text-center leading-tight drop-shadow-[0_1px_2px_rgba(0,0,0,0.4)] dark:drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">
           {project.title}
         </h2>
         {project.location ? (
-          <p className="font-mono text-[10px] md:text-xs text-stone-600 dark:text-white/60 mt-3 uppercase tracking-[0.25em]">
+          <p className="font-mono text-[10px] sm:text-xs text-stone-700 dark:text-white/80 mt-2 sm:mt-3 uppercase tracking-[0.2em] sm:tracking-[0.25em] drop-shadow-[0_1px_2px_rgba(0,0,0,0.3)] dark:drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]">
             {project.location}
           </p>
         ) : null}
