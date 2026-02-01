@@ -26,7 +26,7 @@ export default async function ProjectDetailPage({
         <Viewer3D
           splatUrl={project.splatUrl}
           fallbackMediaUrl={project.fallbackMediaUrl}
-          parallax={false}
+          parallax={true}
         />
         {/* Radial vignette — clear center, solid edges */}
         <div

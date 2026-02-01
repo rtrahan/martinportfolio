@@ -18,7 +18,7 @@ export default function AboutPage() {
         <Viewer3D
           splatUrl={profile.splatUrl ?? undefined}
           fallbackMediaUrl={profile.photo ?? undefined}
-          parallax={false}
+          parallax={true}
           baseZoom={-1}
         />
         {/* Radial vignette — clear center, solid edges */}

@@ -1,6 +1,7 @@
 import { getAllProjects } from '@/lib/projects';
 import { SplatCard } from '@/components/SplatCard';
 import { ProfileHero } from '@/components/ProfileHero';
+import { ThemeToggle } from '@/components/ThemeProvider';
 import profileData from '@/data/profile.json';
 import type { ProfileData } from '@/components/ProfileHero';
 
@@ -22,8 +23,10 @@ export default function GalleryPage() {
         </div>
       </main>
 
-      <footer className="py-6 sm:py-8 px-4 sm:px-6 border-t border-stone-200 dark:border-stone-800 text-center text-stone-600 dark:text-stone-500 text-sm">
+      <footer className="py-6 sm:py-8 px-4 sm:px-6 border-t border-stone-200 dark:border-stone-800 text-center text-stone-600 dark:text-stone-500 text-sm flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6">
         <p>&copy; {new Date().getFullYear()} Martin Braia Rodriguez</p>
+        <span className="hidden sm:inline" aria-hidden="true">·</span>
+        <ThemeToggle />
       </footer>
     </div>
   );

@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
-import { ThemeToggle } from "@/components/ThemeProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -41,7 +40,7 @@ export default function RootLayout({
       <head>
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){var t=localStorage.getItem('martin-portfolio-theme');if(t==='dark')document.documentElement.classList.add('dark');else document.documentElement.classList.remove('dark');})();`,
+            __html: `(function(){var t=localStorage.getItem('martin-portfolio-theme');if(t==='dark'){document.documentElement.classList.add('dark');}else if(t==='light'){document.documentElement.classList.remove('dark');}else{var d=window.matchMedia('(prefers-color-scheme: dark)').matches;if(d)document.documentElement.classList.add('dark');else document.documentElement.classList.remove('dark');}})();`,
           }}
         />
       </head>
@@ -49,9 +48,6 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} ${cormorant.variable} antialiased bg-stone-100 dark:bg-stone-900 text-stone-900 dark:text-stone-100 selection:bg-orange-200 dark:selection:bg-orange-900`}
       >
         {children}
-        <div className="fixed top-4 right-4 z-50 md:top-6 md:right-6" style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))', paddingRight: 'max(1rem, env(safe-area-inset-right))' }}>
-          <ThemeToggle />
-        </div>
       </body>
     </html>
   );

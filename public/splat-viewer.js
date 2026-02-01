@@ -1007,20 +1007,10 @@ async function main() {
     canvas.addEventListener("mousemove", (e) => {
         e.preventDefault();
         if (down == 1) {
-            let inv = invert4(viewMatrix);
-            let dx = (5 * (e.clientX - startX)) / innerWidth;
-            let dy = (5 * (e.clientY - startY)) / innerHeight;
-            let d = 4;
-
-            inv = translate4(inv, 0, 0, d);
-            inv = rotate4(inv, dx, 0, 1, 0);
-            inv = rotate4(inv, -dy, 1, 0, 0);
-            inv = translate4(inv, 0, 0, -d);
-            // let postAngle = Math.atan2(inv[0], inv[10])
-            // inv = rotate4(inv, postAngle - preAngle, 0, 0, 1)
-            // console.log(postAngle)
-            viewMatrix = invert4(inv);
-
+            const dx = (5 * (e.clientX - startX)) / innerWidth;
+            const dy = (5 * (e.clientY - startY)) / innerHeight;
+            userOrbitYaw += dx;
+            userOrbitPitch -= dy;
             startX = e.clientX;
             startY = e.clientY;
         } else if (down == 2) {
@@ -1075,20 +1065,10 @@ async function main() {
         (e) => {
             e.preventDefault();
             if (e.touches.length === 1 && down) {
-                let inv = invert4(viewMatrix);
-                let dx = (4 * (e.touches[0].clientX - startX)) / innerWidth;
-                let dy = (4 * (e.touches[0].clientY - startY)) / innerHeight;
-
-                let d = 4;
-                inv = translate4(inv, 0, 0, d);
-                // inv = translate4(inv,  -x, -y, -z);
-                // inv = translate4(inv,  x, y, z);
-                inv = rotate4(inv, dx, 0, 1, 0);
-                inv = rotate4(inv, -dy, 1, 0, 0);
-                inv = translate4(inv, 0, 0, -d);
-
-                viewMatrix = invert4(inv);
-
+                const dx = (4 * (e.touches[0].clientX - startX)) / innerWidth;
+                const dy = (4 * (e.touches[0].clientY - startY)) / innerHeight;
+                userOrbitYaw += dx;
+                userOrbitPitch -= dy;
                 startX = e.touches[0].clientX;
                 startY = e.touches[0].clientY;
             } else if (e.touches.length === 2) {
@@ -1174,6 +1154,9 @@ async function main() {
     // Limited scroll zoom range (like building images), not infinite
     const zoomLimitIn = -1.5;  // Max zoom IN (offset from base)
     const zoomLimitOut = 2.0;  // Max zoom OUT
+    // Touch/mouse orbit — persisted so frame() doesn't overwrite (project view & about)
+    let userOrbitYaw = 0;
+    let userOrbitPitch = 0;
 
     const updateMouse = (x, y) => {
         targetMx = x;
@@ -1201,12 +1184,25 @@ async function main() {
         }
     });
 
-    window.addEventListener('deviceorientation', e => {
+    const onDeviceOrientation = (e) => {
         if (e.beta !== null && e.gamma !== null) {
             targetMx = Math.max(-1, Math.min(1, e.gamma / 45));
             targetMy = Math.max(-1, Math.min(1, e.beta / 45));
         }
-    });
+    };
+    if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+        canvas.addEventListener('touchstart', () => {
+            DeviceOrientationEvent.requestPermission()
+                .then(permission => {
+                    if (permission === 'granted') {
+                        window.addEventListener('deviceorientation', onDeviceOrientation);
+                    }
+                })
+                .catch(() => {});
+        }, { once: true, passive: true });
+    } else {
+        window.addEventListener('deviceorientation', onDeviceOrientation);
+    }
 
     const frame = (now) => {
         // Smooth easing (Lerp)
@@ -1226,26 +1222,17 @@ async function main() {
             0, 0, 0, 1
         ];
 
-        // 2. Adjust Position - RESET TO ORIGIN (Original Photo Vantage)
-        // baseZoom from URL ?zoom= or default -5.0
-        const zoom = baseZoom + userZoom; // userZoom controlled by scroll wheel (-2 to +10)
-        const panX = 0.0;   
-        const panY = 0.0;   
-        
-        // Apply position adjustments
-        camMatrix = translate4(camMatrix, panX, panY, zoom);
-
-        // 3. Coordinate System Fixes (if needed)
-        // Disabled to match original orientation
-        // camMatrix = rotate4(camMatrix, Math.PI, 0, 1, 0); 
-        
-        // 4. Parallax Effect — very subtle
+        // 2. Position + user orbit (touch/mouse drag) + parallax (mouse/accelerometer)
+        const zoom = baseZoom + userZoom;
+        camMatrix = translate4(camMatrix, 0, 0, zoom);
+        // User orbit from touch or mouse drag (project view & about)
+        camMatrix = rotate4(camMatrix, userOrbitYaw, 0, 1, 0);
+        camMatrix = rotate4(camMatrix, userOrbitPitch, 1, 0, 0);
+        // Parallax from mouse or deviceorientation (home page + all views)
         const yaw = mx * 0.03;
         const pitch = my * 0.03;
-        
         camMatrix = rotate4(camMatrix, yaw, 0, 1, 0);
         camMatrix = rotate4(camMatrix, -pitch, 1, 0, 0);
-        
         camMatrix = translate4(camMatrix, mx * 0.06, -my * 0.06, 0);
 
         // 5. Calculate View Matrix

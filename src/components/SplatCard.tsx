@@ -21,6 +21,10 @@ export function SplatCard({ project }: { project: Project }) {
   const [scale, setScale] = useState(1);
   // Default to mobile zoom so small screens get correct zoom on first paint (no flash)
   const [baseZoom, setBaseZoom] = useState(BASE_ZOOM_MOBILE);
+  // Lazy load splat only when card is in view (speeds up mobile: no loading 5 splats at once)
+  const [inView, setInView] = useState(false);
+  // On mobile home, use fallback image only (splats are ~36MB each; avoid heavy load)
+  const [useFallbackOnly, setUseFallbackOnly] = useState(false);
 
   useEffect(() => {
     const updateZoom = () => {
@@ -29,6 +33,24 @@ export function SplatCard({ project }: { project: Project }) {
     updateZoom();
     window.addEventListener('resize', updateZoom);
     return () => window.removeEventListener('resize', updateZoom);
+  }, []);
+
+  useEffect(() => {
+    const isMobile = window.innerWidth < MOBILE_BREAKPOINT;
+    setUseFallbackOnly(isMobile);
+  }, []);
+
+  useEffect(() => {
+    if (!cardRef.current) return;
+    const el = cardRef.current;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) setInView(true);
+      },
+      { rootMargin: '100px', threshold: 0.01 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
   }, []);
 
   useEffect(() => {
@@ -54,6 +76,9 @@ export function SplatCard({ project }: { project: Project }) {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const loadSplat = inView && !useFallbackOnly;
+  const effectiveSplatUrl = loadSplat ? project.splatUrl : null;
+
   return (
     <div 
       ref={cardRef}
@@ -65,7 +90,7 @@ export function SplatCard({ project }: { project: Project }) {
         style={{ transform: `scale(${scale})` }}
       >
         <Viewer3D
-          splatUrl={project.splatUrl}
+          splatUrl={effectiveSplatUrl}
           fallbackMediaUrl={project.fallbackMediaUrl}
           compact
           baseZoom={baseZoom}
