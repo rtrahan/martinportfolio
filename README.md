@@ -1,36 +1,56 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Martin Braia Rodriguez — Drafting & Design Portfolio
 
-## Getting Started
+Portfolio site with a project gallery and detail pages: 3D building background (Apple SHARP) and tilted plan drawings (PDF/SVG) that open into a flat, zoomable viewer.
 
-First, run the development server:
+## Getting started
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Setup
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Portfolio PDF (plans)
 
-## Learn More
+Copy the portfolio PDF into the site so plan modals can load it:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm run copy-pdf -- /path/to/portfolio.pdf
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Or manually copy your PDF to `public/plans/portfolio.pdf`. Plan page numbers are set in `src/data/projects.json` (1-based: Monitor Barn 6, Post & Beam 8, Contemporary Farm House 10, Garage 12, Details 13).
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 3D backgrounds (SHARP)
 
-## Deploy on Vercel
+1. Run [Apple ml-sharp](https://github.com/apple/ml-sharp) on one photo per building:  
+   `sharp predict -i <photo_dir> -o <output_dir>` → produces `.ply` files.
+2. Convert `.ply` to `.splat` (e.g. [antimatter15/splat](https://github.com/antimatter15/splat) `convert.py`).
+3. Put `.splat` files in `public/splat/` (e.g. `monitor-barn.splat`).
+4. In `src/data/projects.json`, set each project’s `splatUrl` (e.g. `"/splat/monitor-barn.splat"`).
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+If `splatUrl` is null, the detail page shows a gradient fallback. You can set `fallbackMediaUrl` to an image or video URL for devices without WebGL.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Adding or overriding plan assets
+
+- **Same PDF, different page:** Edit `plans[].page` in `src/data/projects.json`.
+- **Separate PDF or SVG per drawing:** Add a new entry to `plans[]` with `type: "pdf"` or `type: "svg"` and `src: "/plans/your-file.pdf"` (or `.svg`). Put the file in `public/plans/`.
+
+## Tech
+
+- **Framework:** Next.js (App Router), TypeScript, Tailwind
+- **3D:** WebGL 3D Gaussian splat viewer (antimatter15/splat iframe when `splatUrl` is set)
+- **Plans:** PDF.js for PDFs; pan/zoom via `react-zoom-pan-pinch`; SVG via `<object>`
+
+## Deploy
+
+Build and run:
+
+```bash
+npm run build
+npm start
+```
+
+Or deploy to [Vercel](https://vercel.com) or any static/Node host.

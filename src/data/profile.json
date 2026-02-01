@@ -1,0 +1,42 @@
+{
+  "name": "Martin Braia Rodriguez",
+  "tagline": "Drafting & Design",
+  "contact": {
+    "email": "martinbraia@gmail.com",
+    "phone": "845.270.2534"
+  },
+  "locations": ["NYC", "Martha's Vineyard"],
+  "photo": "/images/martin-profile.jpg",
+  "bio": "With 18 years of hands-on experience in construction, Martin brings a practical, field-tested perspective to drafting and design. His work spans every stage of building—from site planning and conceptual layout to excavation, framing, and finish carpentry. He grew up working in the trades, performing physically demanding tasks and solving problems on active job sites, which instilled a deep respect for the craft. That background gives him a working understanding of tools, materials, sequencing, and constructability; in his practice, manual labor is not separate from design. He specializes in residential construction and custom homes, integrating structural, mechanical, and civil principles, and his work bridges the gap between design intent and construction execution. He is proficient in CAD, Revit, and construction documentation, producing drawings that meet industry standards and are grounded in real-world constructability.",
+  "accolades": [
+    {
+      "title": "Certifications",
+      "items": [
+        "ACI Concrete Strength Testing Technician",
+        "NRMCA Plant Manager",
+        "UDigNY Certified Excavator",
+        "New York State Commercial Driver's License — Class A",
+        "New York State Emergency Medical Technician",
+        "NREMT Emergency Medical Technician"
+      ]
+    },
+    {
+      "title": "Experience",
+      "items": [
+        "Tradesman × Draftsman × Designer — Trademark Services LLC, Martha's Vineyard (2013–2019); progressed from tradesman to designer within a full-service design-build firm.",
+        "Founder × Designer — Moment Drafting & Design (2019–Present); independent practice providing technical drawings and documentation for design professionals, contractors, and fabricators.",
+        "Site Foreman — Disaster relief reconstruction, Puerto Rico (2018); led volunteer crews on residential reconstruction following Hurricane Maria.",
+        "Heavy Equipment Operator × Project Coordinator — Civil infrastructure, New York (2019–2026)."
+      ]
+    },
+    {
+      "title": "Skills & Tools",
+      "items": [
+        "Design & BIM: Revit, SoftPlan",
+        "Documentation: Bluebeam, Illustrator, Photoshop, InDesign",
+        "Structural concrete, carpentry, roofing, excavation, utilities",
+        "Construction sequencing, materials, methods, and coordination"
+      ]
+    }
+  ]
+}

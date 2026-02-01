@@ -1,8 +1,29 @@
 @import "tailwindcss";
 
+/* Class-based dark mode: add .dark to html for dark theme; default = light */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f5f5f4; /* stone-100 */
+  --foreground: #1c1917; /* stone-900 */
+  /* Panel / gradient (light) */
+  --panel-bg: #f5f5f4;
+  --panel-gradient-start: #f5f5f4;
+  --blend-overlay: 245, 245, 244; /* stone-100 rgb */
+  --vignette-from: rgba(245, 245, 244, 0.9);
+  --vignette-to: rgba(245, 245, 244, 0.4);
+  --card-portal: 245, 245, 244;
+}
+
+.dark {
+  --background: #1c1917; /* stone-900 */
+  --foreground: #e7e5e4; /* stone-200 */
+  --panel-bg: #1c1917;
+  --panel-gradient-start: #1c1917;
+  --blend-overlay: 28, 25, 23;
+  --vignette-from: rgba(28, 25, 23, 0.9);
+  --vignette-to: rgba(28, 25, 23, 0.4);
+  --card-portal: 28, 25, 23;
 }
 
 @theme inline {
@@ -10,17 +31,37 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --font-serif: var(--font-cormorant);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-serif), serif;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #d6d3d1;
+  border-radius: 4px;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #44403c;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a29e;
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #57534e;
 }

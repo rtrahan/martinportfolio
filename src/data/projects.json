@@ -1,0 +1,88 @@
+[
+  {
+    "slug": "monitor-barn",
+    "title": "Monitor Barn",
+    "location": "Martha's Vineyard, MA",
+    "description": "This barn was designed for a tradesman on Martha's Vineyard who, after recently starting a family, needed a shop space that was both highly functional and beautiful. The intent was to create a workspace that could serve his business while maintaining the flexibility to partially convert into an accessory dwelling unit in the future. This dual-use concept guided many of the early decisions, as natural light, ventilation, and spatial hierarchy had to support both modes of use.\n\nThe building takes its cues from the traditional monitor barn—long a staple of agricultural structures—but adapted the to a contemporary island context. The raised monitor volume introduces light into the center of the plan, while the south-facing side opens into a covered portico, providing shaded outdoor work area and weather protection for material handling.\n\nSite and regulatory constraints dictated that the footprint not exceed 36' x 36'. Working within that boundary, the plan was organized to accommodate both a functional workshop layout and a future living configuration without inflating the envelope. The structure itself reflects this logic as well: the building is stick framed and built on a 6\" slab-on-grade with a thickened edge. The portico is framed using a box-beam design for strength and visual lightness, while the monitor employs a cantilever detail to minimize visible vertical supports and preserve the interior clearance needed for equipment and tool workflows.\n\nTogether, these decisions produced a building that feels grounded in the practical realities of a working tradesman's life—durable, adaptable, flexible, and understated—while still offering the possibility of domesticity and warmth in the years ahead.",
+    "splatUrl": "/splat/monitor-barn.splat",
+    "fallbackMediaUrl": "/images/monitor-barn.png",
+    "plans": [
+      {
+        "type": "pdf",
+        "src": "/plans/monitor-barn.pdf",
+        "page": 1,
+        "label": "Construction Set"
+      }
+    ]
+  },
+  {
+    "slug": "post-and-beam-residence",
+    "title": "Post & Beam Residence",
+    "location": "Martha's Vineyard, MA",
+    "description": "Designed by a post-and-beam framer on Martha's Vineyard, this project pairs a classic New England cape with traditional timber frame construction while incorporating contemporary building systems. Structural insulated panels (SIPs) form the enclosure and provide high thermal performance, energy efficiency, and ease of installation on a coastal site.",
+    "splatUrl": "/splat/post-and-beam-residence.splat",
+    "fallbackMediaUrl": "/images/post-and-beam.png",
+    "plans": [
+      {
+        "type": "pdf",
+        "src": "/plans/portfolio.pdf",
+        "page": 8,
+        "label": "Plan"
+      }
+    ]
+  },
+  {
+    "slug": "contemporary-farm-house",
+    "title": "Contemporary Farm House",
+    "location": "Stowe, VT",
+    "description": "This modern farmhouse proposal adapts classic Vermont agricultural forms to contemporary residential use. Traditional barn-inspired massing is combined with modern elements including expansive glazing, a standing-seam metal roof, and a generous elevated deck that frames views toward the surrounding landscape.",
+    "splatUrl": "/splat/contemporary-farm-house.splat",
+    "fallbackMediaUrl": "/images/contemporary-farm.png",
+    "plans": [
+      {
+        "type": "pdf",
+        "src": "/plans/contemporary farm-1.pdf",
+        "page": 1,
+        "label": "Floor Plans"
+      },
+      {
+        "type": "pdf",
+        "src": "/plans/contemporary farm-2.pdf",
+        "page": 1,
+        "label": "Elevations"
+      }
+    ]
+  },
+  {
+    "slug": "garage",
+    "title": "Garage",
+    "location": "Stowe, VT",
+    "description": "Located in Stowe, Vermont this garage was designed to reference regional farm and outbuilding forms while accommodating a modern double vehicle bay and future residential use above. A simple gable form, vertical siding, and limited detailing keep the structure consistent with local agrarian building traditions.",
+    "splatUrl": "/splat/garage.splat",
+    "fallbackMediaUrl": "/images/garage.png",
+    "plans": [
+      {
+        "type": "pdf",
+        "src": "/plans/garage.pdf",
+        "page": 1,
+        "label": "Plans & Elevations"
+      }
+    ]
+  },
+  {
+    "slug": "details",
+    "title": "Details",
+    "location": "",
+    "description": "Clear detailing in architectural and structural drawings is critical to ensuring that design intent becomes buildable. Good details communicate how materials and systems integrate, how loads transfer, and how weather is managed—reducing ambiguity in the field and minimizing mistakes.",
+    "splatUrl": null,
+    "fallbackMediaUrl": null,
+    "plans": [
+      {
+        "type": "pdf",
+        "src": "/plans/portfolio.pdf",
+        "page": 13,
+        "label": "Details"
+      }
+    ]
+  }
+]

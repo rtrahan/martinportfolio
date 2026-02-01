@@ -1,0 +1,57 @@
+[
+  {
+    "slug": "monitor-barn",
+    "title": "Monitor Barn",
+    "location": "Martha's Vineyard, MA",
+    "description": "This barn was designed for a tradesman on Martha's Vineyard who, after recently starting a family, needed a shop space that was both highly functional and beautiful. The intent was to create a workspace that could serve his business while maintaining the flexibility to partially convert into an accessory dwelling unit in the future. The building takes its cues from the traditional monitor barn—long a staple of agricultural structures—but adapted to a contemporary island context.",
+    "splatUrl": null,
+    "fallbackMediaUrl": null,
+    "plans": [
+      { "type": "pdf", "src": "/plans/portfolio.pdf", "page": 6, "label": "Plan" }
+    ]
+  },
+  {
+    "slug": "post-and-beam-residence",
+    "title": "Post & Beam Residence",
+    "location": "Martha's Vineyard, MA",
+    "description": "Designed by a post-and-beam framer on Martha's Vineyard, this project pairs a classic New England cape with traditional timber frame construction while incorporating contemporary building systems. Structural insulated panels (SIPs) form the enclosure and provide high thermal performance, energy efficiency, and ease of installation on a coastal site.",
+    "splatUrl": null,
+    "fallbackMediaUrl": null,
+    "plans": [
+      { "type": "pdf", "src": "/plans/portfolio.pdf", "page": 8, "label": "Plan" }
+    ]
+  },
+  {
+    "slug": "contemporary-farm-house",
+    "title": "Contemporary Farm House",
+    "location": "Stowe, VT",
+    "description": "This modern farmhouse proposal adapts classic Vermont agricultural forms to contemporary residential use. Traditional barn-inspired massing is combined with modern elements including expansive glazing, a standing-seam metal roof, and a generous elevated deck that frames views toward the surrounding landscape.",
+    "splatUrl": null,
+    "fallbackMediaUrl": null,
+    "plans": [
+      { "type": "pdf", "src": "/plans/portfolio.pdf", "page": 10, "label": "Plan" }
+    ]
+  },
+  {
+    "slug": "garage",
+    "title": "Garage",
+    "location": "Stowe, VT",
+    "description": "Located in Stowe, Vermont this garage was designed to reference regional farm and outbuilding forms while accommodating a modern double vehicle bay and future residential use above. A simple gable form, vertical siding, and limited detailing keep the structure consistent with local agrarian building traditions.",
+    "splatUrl": null,
+    "fallbackMediaUrl": null,
+    "plans": [
+      { "type": "pdf", "src": "/plans/portfolio.pdf", "page": 12, "label": "Plan" }
+    ]
+  },
+  {
+    "slug": "details",
+    "title": "Details",
+    "location": "",
+    "description": "Clear detailing in architectural and structural drawings is critical to ensuring that design intent becomes buildable. Good details communicate how materials and systems integrate, how loads transfer, and how weather is managed—reducing ambiguity in the field and minimizing mistakes.",
+    "splatUrl": null,
+    "fallbackMediaUrl": null,
+    "plans": [
+      { "type": "pdf", "src": "/plans/portfolio.pdf", "page": 13, "label": "Details" }
+    ]
+  }
+]
