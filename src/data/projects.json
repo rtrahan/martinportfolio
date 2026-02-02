@@ -9,9 +9,15 @@
     "plans": [
       {
         "type": "pdf",
-        "src": "/plans/monitor-barn.pdf",
+        "src": "/plans/monitor.pdf",
         "page": 1,
-        "label": "Construction Set"
+        "label": "Floor Plan"
+      },
+      {
+        "type": "pdf",
+        "src": "/plans/monitor barn section_49runner.tif.pdf",
+        "page": 1,
+        "label": "Section"
       }
     ]
   },
@@ -25,9 +31,21 @@
     "plans": [
       {
         "type": "pdf",
-        "src": "/plans/portfolio.pdf",
-        "page": 8,
-        "label": "Plan"
+        "src": "/plans/post and beam main floor plan.pdf",
+        "page": 1,
+        "label": "Main Floor Plan"
+      },
+      {
+        "type": "pdf",
+        "src": "/plans/post and beam basement_plan.pdf",
+        "page": 1,
+        "label": "Basement Plan"
+      },
+      {
+        "type": "pdf",
+        "src": "/plans/post and beam detail.pdf",
+        "page": 1,
+        "label": "Detail"
       }
     ]
   },
@@ -61,6 +79,18 @@
     "splatUrl": "/splat/garage.splat",
     "fallbackMediaUrl": "/images/garage.png",
     "plans": [
+      {
+        "type": "pdf",
+        "src": "/plans/garage main floor.pdf",
+        "page": 1,
+        "label": "Main Floor"
+      },
+      {
+        "type": "pdf",
+        "src": "/plans/garage section1.pdf",
+        "page": 1,
+        "label": "Section"
+      },
       {
         "type": "pdf",
         "src": "/plans/garage.pdf",
