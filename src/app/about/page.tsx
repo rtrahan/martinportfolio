@@ -21,24 +21,24 @@ export default function AboutPage() {
           parallax={true}
           baseZoom={-1}
         />
-        {/* Radial vignette — clear center, solid edges */}
+        {/* Radial vignette — clear center, solid edges (desktop only) */}
         <div
-          className="absolute inset-0 pointer-events-none dark:opacity-0"
+          className="absolute inset-0 pointer-events-none hidden md:block dark:opacity-0"
           style={{
             background: 'radial-gradient(ellipse 70% 60% at 50% 50%, transparent 0%, transparent 50%, rgba(245,245,244,0.4) 65%, rgba(245,245,244,0.8) 80%, #f5f5f4 95%, #f5f5f4 100%)',
           }}
         />
         <div
-          className="absolute inset-0 pointer-events-none opacity-0 dark:opacity-100"
+          className="absolute inset-0 pointer-events-none hidden md:block opacity-0 dark:opacity-100"
           style={{
             background: 'radial-gradient(ellipse 70% 60% at 50% 50%, transparent 0%, transparent 50%, rgba(28,25,23,0.4) 65%, rgba(28,25,23,0.8) 80%, #1c1917 95%, #1c1917 100%)',
           }}
         />
-        {/* Edge fades — all sides */}
-        <div className="absolute inset-0 pointer-events-none bg-gradient-to-r from-stone-100 dark:from-stone-900 via-transparent to-transparent" style={{ backgroundSize: '30% 100%', backgroundPosition: 'left', backgroundRepeat: 'no-repeat' }} />
-        <div className="absolute inset-0 pointer-events-none bg-gradient-to-l from-stone-100 dark:from-stone-900 via-transparent to-transparent" style={{ backgroundSize: '30% 100%', backgroundPosition: 'right', backgroundRepeat: 'no-repeat' }} />
-        <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-stone-100 dark:from-stone-900 via-transparent to-transparent" style={{ backgroundSize: '100% 30%', backgroundPosition: 'top', backgroundRepeat: 'no-repeat' }} />
-        <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-stone-100 dark:from-stone-900 via-transparent to-transparent" style={{ backgroundSize: '100% 30%', backgroundPosition: 'bottom', backgroundRepeat: 'no-repeat' }} />
+        {/* Edge fades — all sides (desktop only) */}
+        <div className="absolute inset-0 pointer-events-none hidden md:block bg-gradient-to-r from-stone-100 dark:from-stone-900 via-transparent to-transparent" style={{ backgroundSize: '30% 100%', backgroundPosition: 'left', backgroundRepeat: 'no-repeat' }} />
+        <div className="absolute inset-0 pointer-events-none hidden md:block bg-gradient-to-l from-stone-100 dark:from-stone-900 via-transparent to-transparent" style={{ backgroundSize: '30% 100%', backgroundPosition: 'right', backgroundRepeat: 'no-repeat' }} />
+        <div className="absolute inset-0 pointer-events-none hidden md:block bg-gradient-to-b from-stone-100 dark:from-stone-900 via-transparent to-transparent" style={{ backgroundSize: '100% 30%', backgroundPosition: 'top', backgroundRepeat: 'no-repeat' }} />
+        <div className="absolute inset-0 pointer-events-none hidden md:block bg-gradient-to-t from-stone-100 dark:from-stone-900 via-transparent to-transparent" style={{ backgroundSize: '100% 30%', backgroundPosition: 'bottom', backgroundRepeat: 'no-repeat' }} />
       </div>
 
       {/* Right blend into panel */}
