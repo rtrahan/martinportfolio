@@ -4,7 +4,6 @@ import { getProjectBySlug, getProjectSlugs } from '@/lib/projects';
 import { Viewer3D } from '@/components/Viewer3D';
 import { PlanCards } from '@/components/PlanCards';
 import { ProjectNarrativePanel } from '@/components/ProjectNarrativePanel';
-import { MobileProjectInfo } from '@/components/MobileProjectInfo';
 
 export function generateStaticParams() {
   return getProjectSlugs().map((slug) => ({ slug }));
@@ -21,8 +20,8 @@ export default async function ProjectDetailPage({
 
   return (
     <div className="relative h-screen w-screen overflow-hidden bg-stone-100 dark:bg-stone-900 text-stone-900 dark:text-stone-100">
-      {/* 3D Background Layer — left of narrative panel only */}
-      <div className="absolute top-0 left-0 bottom-0 right-0 md:right-[420px] lg:right-[480px] z-0">
+      {/* 3D Background Layer — top 45% on mobile, left of panel on desktop */}
+      <div className="absolute top-0 left-0 h-[45vh] md:h-full right-0 md:right-[420px] lg:right-[480px] z-0">
         <Viewer3D
           splatUrl={project.splatUrl}
           fallbackMediaUrl={project.fallbackMediaUrl}
@@ -77,15 +76,8 @@ export default async function ProjectDetailPage({
         </Link>
       </header>
 
-      {/* Narrative panel — part of main view on md+; hidden on mobile */}
+      {/* Narrative panel — bottom 60% on mobile, right side on desktop */}
       <ProjectNarrativePanel
-        title={project.title}
-        location={project.location}
-        description={project.description}
-      />
-
-      {/* Mobile only: floating "Project info" button + sheet with narrative + plans */}
-      <MobileProjectInfo
         title={project.title}
         location={project.location}
         description={project.description}
