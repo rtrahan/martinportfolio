@@ -2,6 +2,11 @@
 
 import { useEffect, useState, useRef } from 'react';
 
+/** Mobile breakpoint */
+const MOBILE_BREAKPOINT = 768;
+/** Default zoom on mobile - more zoomed out to see full building */
+const MOBILE_BASE_ZOOM = 5;
+
 /** 
  * 3D Gaussian splat viewer with parallax effect.
  * Uses antimatter15/splat iframe viewer for reliability.
@@ -40,8 +45,13 @@ export function Viewer3D({
         ? `${window.location.origin}${splatUrl}` 
         : splatUrl;
       const search = new URLSearchParams({ url: fullUrl });
-      if (typeof baseZoom === 'number' && !Number.isNaN(baseZoom)) {
-        search.set('zoom', String(baseZoom));
+      
+      // On mobile, zoom out more so the full building is visible
+      const isMobile = window.innerWidth < MOBILE_BREAKPOINT;
+      const effectiveZoom = isMobile ? MOBILE_BASE_ZOOM : (baseZoom ?? 0);
+      
+      if (typeof effectiveZoom === 'number' && !Number.isNaN(effectiveZoom)) {
+        search.set('zoom', String(effectiveZoom));
       }
       setIframeUrl(`/splat-viewer.html?${search.toString()}`);
     }
