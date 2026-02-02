@@ -13,8 +13,8 @@ export default function AboutPage() {
 
   return (
     <div className="relative h-screen w-screen overflow-hidden bg-stone-100 dark:bg-stone-900 text-stone-900 dark:text-stone-100">
-      {/* Portrait splat — left of panel, same layout as project viewer */}
-      <div className="absolute top-0 left-0 bottom-0 right-0 md:right-[420px] lg:right-[480px] z-0">
+      {/* Portrait splat — top 40% on mobile, left of panel on desktop */}
+      <div className="absolute top-0 left-0 h-[45vh] md:h-full right-0 md:right-[420px] lg:right-[480px] z-0">
         <Viewer3D
           splatUrl={profile.splatUrl ?? undefined}
           fallbackMediaUrl={profile.photo ?? undefined}
@@ -86,7 +86,6 @@ export default function AboutPage() {
         contact={profile.contact}
         accoladesExcludingCertifications={accoladesExcludingCertifications}
         certifications={certifications?.items ?? []}
-        photo={profile.photo}
       />
     </div>
   );
