@@ -7,6 +7,7 @@ export interface ProfileAccolade {
 
 /**
  * About page right panel: name, locations, bio, Experience, Skills, Contact, then Certifications at bottom.
+ * On mobile, shows profile photo at the top since the splat isn't visible.
  */
 export function AboutPanel({
   name,
@@ -15,6 +16,7 @@ export function AboutPanel({
   contact,
   accoladesExcludingCertifications,
   certifications,
+  photo,
 }: {
   name: string;
   locations: string[];
@@ -22,6 +24,7 @@ export function AboutPanel({
   contact: { email: string; phone?: string };
   accoladesExcludingCertifications: ProfileAccolade[];
   certifications: string[];
+  photo?: string | null;
 }) {
   return (
     <aside
@@ -32,6 +35,19 @@ export function AboutPanel({
       }}
     >
       <div className="flex-1 flex flex-col min-h-0 p-8 md:p-10">
+        {/* Mobile: Profile photo at top */}
+        {photo && (
+          <div className="md:hidden flex-shrink-0 mb-6">
+            <div className="w-24 h-24 rounded-full overflow-hidden bg-stone-200 dark:bg-stone-800 ring-2 ring-stone-300 dark:ring-stone-700">
+              <img 
+                src={photo} 
+                alt={name}
+                className="w-full h-full object-cover object-top"
+              />
+            </div>
+          </div>
+        )}
+        
         <div className="flex-shrink-0 mb-8">
           <h1 className="text-2xl md:text-3xl lg:text-4xl font-serif font-normal text-stone-900 dark:text-white tracking-tight">
             {name}

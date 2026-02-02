@@ -86,6 +86,7 @@ export default function AboutPage() {
         contact={profile.contact}
         accoladesExcludingCertifications={accoladesExcludingCertifications}
         certifications={certifications?.items ?? []}
+        photo={profile.photo}
       />
     </div>
   );
