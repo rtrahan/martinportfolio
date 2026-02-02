@@ -5,7 +5,7 @@ import { useEffect, useState, useRef } from 'react';
 /** Mobile breakpoint */
 const MOBILE_BREAKPOINT = 768;
 /** Zoom out more on mobile so the whole building is visible in the smaller frame */
-const MOBILE_ZOOM_OUT = 8;
+const MOBILE_ZOOM_OUT = 15;
 
 /** 
  * 3D Gaussian splat viewer with parallax effect.
