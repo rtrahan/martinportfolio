@@ -5,7 +5,7 @@ import { useEffect, useState, useRef } from 'react';
 /** Mobile breakpoint */
 const MOBILE_BREAKPOINT = 768;
 /** Zoom level for mobile view */
-const MOBILE_ZOOM = -5;
+const MOBILE_ZOOM = -10;
 
 /** 
  * 3D Gaussian splat viewer with parallax effect.
