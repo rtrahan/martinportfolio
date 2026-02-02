@@ -988,74 +988,27 @@ async function main() {
         { passive: false },
     );
 
-    let startX, startY, down;
-    canvas.addEventListener("mousedown", (e) => {
-        carousel = false;
-        e.preventDefault();
-        startX = e.clientX;
-        startY = e.clientY;
-        down = e.ctrlKey || e.metaKey ? 2 : 1;
-    });
+    // Disabled: mouse drag orbit/pan - only zoom via scroll wheel is allowed
+    // Disabled: single-finger touch orbit - only pinch zoom is allowed
+    
+    let startX = 0, startY = 0, altX = 0, altY = 0;
+    
+    // Prevent context menu
     canvas.addEventListener("contextmenu", (e) => {
-        carousel = false;
         e.preventDefault();
-        startX = e.clientX;
-        startY = e.clientY;
-        down = 2;
     });
 
-    canvas.addEventListener("mousemove", (e) => {
-        e.preventDefault();
-        if (down == 1) {
-            const dx = (5 * (e.clientX - startX)) / innerWidth;
-            const dy = (5 * (e.clientY - startY)) / innerHeight;
-            userOrbitYaw += dx;
-            userOrbitPitch -= dy;
-            startX = e.clientX;
-            startY = e.clientY;
-        } else if (down == 2) {
-            let inv = invert4(viewMatrix);
-            // inv = rotateY(inv, );
-            // let preY = inv[13];
-            inv = translate4(
-                inv,
-                (-10 * (e.clientX - startX)) / innerWidth,
-                0,
-                (10 * (e.clientY - startY)) / innerHeight,
-            );
-            // inv[13] = preY;
-            viewMatrix = invert4(inv);
-
-            startX = e.clientX;
-            startY = e.clientY;
-        }
-    });
-    canvas.addEventListener("mouseup", (e) => {
-        e.preventDefault();
-        down = false;
-        startX = 0;
-        startY = 0;
-    });
-
-    let altX = 0,
-        altY = 0;
+    // Touch: only two-finger pinch for zoom (no pan, no rotate)
     canvas.addEventListener(
         "touchstart",
         (e) => {
-            e.preventDefault();
-            if (e.touches.length === 1) {
-                carousel = false;
-                startX = e.touches[0].clientX;
-                startY = e.touches[0].clientY;
-                down = 1;
-            } else if (e.touches.length === 2) {
-                // console.log('beep')
+            if (e.touches.length === 2) {
+                e.preventDefault();
                 carousel = false;
                 startX = e.touches[0].clientX;
                 altX = e.touches[1].clientX;
                 startY = e.touches[0].clientY;
                 altY = e.touches[1].clientY;
-                down = 1;
             }
         },
         { passive: false },
@@ -1063,49 +1016,20 @@ async function main() {
     canvas.addEventListener(
         "touchmove",
         (e) => {
-            e.preventDefault();
-            if (e.touches.length === 1 && down) {
-                const dx = (4 * (e.touches[0].clientX - startX)) / innerWidth;
-                const dy = (4 * (e.touches[0].clientY - startY)) / innerHeight;
-                userOrbitYaw += dx;
-                userOrbitPitch -= dy;
-                startX = e.touches[0].clientX;
-                startY = e.touches[0].clientY;
-            } else if (e.touches.length === 2) {
-                // alert('beep')
-                const dtheta =
-                    Math.atan2(startY - altY, startX - altX) -
-                    Math.atan2(
-                        e.touches[0].clientY - e.touches[1].clientY,
-                        e.touches[0].clientX - e.touches[1].clientX,
-                    );
+            if (e.touches.length === 2) {
+                e.preventDefault();
+                // Only zoom (pinch), no rotation or pan
                 const dscale =
                     Math.hypot(startX - altX, startY - altY) /
                     Math.hypot(
                         e.touches[0].clientX - e.touches[1].clientX,
                         e.touches[0].clientY - e.touches[1].clientY,
                     );
-                const dx =
-                    (e.touches[0].clientX +
-                        e.touches[1].clientX -
-                        (startX + altX)) /
-                    2;
-                const dy =
-                    (e.touches[0].clientY +
-                        e.touches[1].clientY -
-                        (startY + altY)) /
-                    2;
-                let inv = invert4(viewMatrix);
-                // inv = translate4(inv,  0, 0, d);
-                inv = rotate4(inv, dtheta, 0, 0, 1);
-
-                inv = translate4(inv, -dx / innerWidth, -dy / innerHeight, 0);
-
-                // let preY = inv[13];
-                inv = translate4(inv, 0, 0, 3 * (1 - dscale));
-                // inv[13] = preY;
-
-                viewMatrix = invert4(inv);
+                
+                // Apply zoom
+                userZoom += 3 * (1 - dscale);
+                if (userZoom < -2.0) userZoom = -2.0;
+                if (userZoom > 10.0) userZoom = 10.0;
 
                 startX = e.touches[0].clientX;
                 altX = e.touches[1].clientX;
@@ -1119,7 +1043,6 @@ async function main() {
         "touchend",
         (e) => {
             e.preventDefault();
-            down = false;
             startX = 0;
             startY = 0;
         },
