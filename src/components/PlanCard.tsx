@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import type { Plan } from '@/types/project';
 import { PlanModal } from './PlanModal';
 
-export function PlanCard({ plan }: { plan: Plan }) {
+export function PlanCard({ plan, compact = false }: { plan: Plan; compact?: boolean }) {
   const [modalOpen, setModalOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -64,6 +64,48 @@ export function PlanCard({ plan }: { plan: Plan }) {
     return () => { cancelled = true; };
   }, [plan.src, plan.page]);
 
+  // Compact mode: simple flat card for mobile panels
+  if (compact) {
+    return (
+      <>
+        <button
+          type="button"
+          onClick={handleOpen}
+          className="group relative block text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 rounded-lg overflow-hidden"
+          aria-label={plan.label ? `View ${plan.label}` : 'View plan'}
+        >
+          <div
+            ref={cardRef}
+            className="aspect-[4/3] bg-[#f5f5f0] shadow-md rounded-lg overflow-hidden relative"
+          >
+            {/* PDF Thumbnail */}
+            <canvas 
+              ref={canvasRef} 
+              className="absolute inset-0 w-full h-full object-cover" 
+            />
+            
+            {/* Label overlay */}
+            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-3 pt-8">
+              <span className="font-mono text-xs text-white uppercase tracking-wider">
+                {plan.label ?? 'View Plan'}
+              </span>
+            </div>
+          </div>
+        </button>
+
+        {modalOpen && (
+          <PlanModal
+            plan={plan}
+            initialRect={initialRect}
+            thumbnailUrl={thumbnailUrl}
+            onClose={() => setModalOpen(false)}
+          />
+        )}
+      </>
+    );
+  }
+
+  // Desktop mode: 3D tilted cards
   return (
     <>
       <button

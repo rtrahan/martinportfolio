@@ -60,13 +60,13 @@ export function ProjectNarrativePanel({
             </p>
           ))}
 
-          {/* Plans — shown on mobile in panel, on desktop below splat */}
+          {/* Plans — shown on mobile in panel with compact layout */}
           {plans && plans.length > 0 && (
             <div className="md:hidden pt-8 border-t border-stone-200 dark:border-white/10">
               <h2 className="text-[10px] font-sans font-medium tracking-[0.2em] text-stone-500 uppercase mb-4">
                 Plans
               </h2>
-              <PlanCards plans={plans} />
+              <PlanCards plans={plans} compact />
             </div>
           )}
         </div>
