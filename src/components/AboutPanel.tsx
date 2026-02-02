@@ -27,7 +27,7 @@ export function AboutPanel({
 }) {
   return (
     <aside
-      className="fixed bottom-0 left-0 right-0 z-20 h-[65vh] md:h-full md:top-0 md:left-auto md:w-[420px] lg:w-[480px] flex flex-col overflow-hidden rounded-t-2xl md:rounded-none bg-stone-100 dark:bg-stone-900 md:bg-transparent"
+      className="fixed bottom-0 left-0 right-0 z-20 h-[75vh] md:h-full md:top-0 md:left-auto md:w-[420px] lg:w-[480px] flex flex-col overflow-hidden rounded-t-2xl md:rounded-none bg-stone-100 dark:bg-stone-900 md:bg-transparent"
       aria-label="About Martin"
       style={{
         ['--tw-bg-opacity' as string]: 1,
