@@ -23,7 +23,7 @@ export function ProjectNarrativePanel({
 
   return (
     <aside
-      className="fixed bottom-0 left-0 right-0 z-20 h-[60vh] md:h-full md:top-0 md:left-auto md:w-[420px] lg:w-[480px] flex flex-col overflow-hidden rounded-t-2xl md:rounded-none bg-stone-100 dark:bg-stone-900 md:bg-transparent"
+      className="fixed bottom-0 left-0 right-0 z-20 h-[65vh] md:h-full md:top-0 md:left-auto md:w-[420px] lg:w-[480px] flex flex-col overflow-hidden rounded-t-2xl md:rounded-none bg-stone-100 dark:bg-stone-900 md:bg-transparent"
       aria-label="Project narrative"
     >
       {/* Mobile: drag indicator */}
