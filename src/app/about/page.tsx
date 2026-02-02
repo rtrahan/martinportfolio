@@ -13,8 +13,8 @@ export default function AboutPage() {
 
   return (
     <div className="relative h-screen w-screen overflow-hidden bg-stone-100 dark:bg-stone-900 text-stone-900 dark:text-stone-100">
-      {/* Portrait splat — top 25% on mobile, left of panel on desktop */}
-      <div className="absolute top-0 left-0 h-[25vh] md:h-full right-0 md:right-[420px] lg:right-[480px] z-0">
+      {/* Portrait splat — top 25% on mobile (with padding), left of panel on desktop */}
+      <div className="absolute top-0 left-4 right-4 h-[25vh] md:h-full md:left-0 md:right-[420px] lg:right-[480px] z-0 rounded-b-2xl md:rounded-none overflow-hidden">
         <Viewer3D
           splatUrl={profile.splatUrl ?? undefined}
           fallbackMediaUrl={profile.photo ?? undefined}
