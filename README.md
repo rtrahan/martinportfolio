@@ -27,7 +27,8 @@ Or manually copy your PDF to `public/plans/portfolio.pdf`. Plan page numbers are
 
 1. Run [Apple ml-sharp](https://github.com/apple/ml-sharp) on one photo per building:  
    `sharp predict -i <photo_dir> -o <output_dir>` → produces `.ply` files.
-2. Convert `.ply` to `.splat` (e.g. [antimatter15/splat](https://github.com/antimatter15/splat) `convert.py`). `.ply` files are gitignored; keep them locally or regenerate as needed.
+2. Convert `.ply` to `.splat` with `tools/convert_ply_to_splat.py` (or [antimatter15/splat](https://github.com/antimatter15/splat) `convert.py`). `.ply` files are gitignored; keep them locally or regenerate as needed.
+   - **Smaller files / faster load:** From PLY: use `convert_ply_to_splat.py --ratio 0.25`. From existing .splat only: `python tools/downsample_splat.py --ratio 0.25 public/splat/*.splat` (overwrites in place; default 0.25 ≈ 4× smaller).
 3. Put `.splat` files in `public/splat/` (e.g. `monitor-barn.splat`).
 4. In `src/data/projects.json`, set each project’s `splatUrl` (e.g. `"/splat/monitor-barn.splat"`).
 
