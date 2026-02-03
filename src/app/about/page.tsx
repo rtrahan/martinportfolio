@@ -63,7 +63,6 @@ export default function AboutPage() {
             fallbackMediaUrl={profile.photo ?? undefined}
             parallax={true}
             baseZoom={0}
-            desktopZoom={-5}
           />
           {/* Radial vignette — clear center, solid edges (desktop only) */}
           <div
