@@ -62,7 +62,7 @@ export default function AboutPage() {
             splatUrl={profile.splatUrl ?? undefined}
             fallbackMediaUrl={profile.photo ?? undefined}
             parallax={true}
-            baseZoom={-1}
+            baseZoom={0}
           />
           {/* Radial vignette — clear center, solid edges (desktop only) */}
           <div

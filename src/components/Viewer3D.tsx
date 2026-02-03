@@ -46,9 +46,9 @@ export function Viewer3D({
         : splatUrl;
       const search = new URLSearchParams({ url: fullUrl });
       
-      // On mobile, use different zoom to fit building in smaller frame
+      // When baseZoom is passed (e.g. project/about), use it for both; otherwise mobile uses MOBILE_ZOOM
       const isMobile = window.innerWidth < MOBILE_BREAKPOINT;
-      const effectiveZoom = isMobile ? MOBILE_ZOOM : (baseZoom ?? -5);
+      const effectiveZoom = baseZoom !== undefined ? baseZoom : (isMobile ? MOBILE_ZOOM : -5);
       
       search.set('zoom', String(effectiveZoom));
       setIframeUrl(`/splat-viewer.html?${search.toString()}`);

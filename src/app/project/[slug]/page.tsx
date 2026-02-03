@@ -61,6 +61,7 @@ export default async function ProjectDetailPage({
             splatUrl={project.splatUrl}
             fallbackMediaUrl={project.fallbackMediaUrl}
             parallax={true}
+            baseZoom={0}
           />
           {/* Radial vignette — clear center, solid edges (desktop only) */}
           <div
