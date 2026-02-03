@@ -27,7 +27,7 @@ Or manually copy your PDF to `public/plans/portfolio.pdf`. Plan page numbers are
 
 1. Run [Apple ml-sharp](https://github.com/apple/ml-sharp) on one photo per building:  
    `sharp predict -i <photo_dir> -o <output_dir>` → produces `.ply` files.
-2. Convert `.ply` to `.splat` (e.g. [antimatter15/splat](https://github.com/antimatter15/splat) `convert.py`).
+2. Convert `.ply` to `.splat` (e.g. [antimatter15/splat](https://github.com/antimatter15/splat) `convert.py`). `.ply` files are gitignored; keep them locally or regenerate as needed.
 3. Put `.splat` files in `public/splat/` (e.g. `monitor-barn.splat`).
 4. In `src/data/projects.json`, set each project’s `splatUrl` (e.g. `"/splat/monitor-barn.splat"`).
 
@@ -41,7 +41,7 @@ If `splatUrl` is null, the detail page shows a gradient fallback. You can set `f
 ## Tech
 
 - **Framework:** Next.js (App Router), TypeScript, Tailwind
-- **3D:** WebGL 3D Gaussian splat viewer (antimatter15/splat iframe when `splatUrl` is set)
+- **3D:** WebGL 3D Gaussian splat viewer (antimatter15/splat iframe at `splat-viewer.html` when `splatUrl` is set); loads `.splat` URLs with zoom and progressive loading.
 - **Plans:** PDF.js for PDFs; pan/zoom via `react-zoom-pan-pinch`; SVG via `<object>`
 
 ## Deploy

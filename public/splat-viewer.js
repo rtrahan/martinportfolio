@@ -739,6 +739,9 @@ let viewMatrix = defaultViewMatrix;
 async function main() {
     let carousel = true;
     const params = new URLSearchParams(location.search);
+    // Match site light/dark mode (stone-100 / stone-900)
+    const theme = params.get("theme") || "light";
+    document.body.style.background = theme === "dark" ? "#1c1917" : "#f5f5f4";
     const zoomParam = params.get("zoom");
     const baseZoomFromUrl = zoomParam !== null ? parseFloat(zoomParam) : NaN;
     const baseZoom = !isNaN(baseZoomFromUrl) ? baseZoomFromUrl : -5.0;
@@ -799,6 +802,8 @@ async function main() {
     const gl = canvas.getContext("webgl2", {
         antialias: false,
     });
+    // Clear to full transparent so we don't tint the splats; background shows via document.body
+    gl.clearColor(0, 0, 0, 0);
 
     const vertexShader = gl.createShader(gl.VERTEX_SHADER);
     gl.shaderSource(vertexShader, vertexShaderSource);

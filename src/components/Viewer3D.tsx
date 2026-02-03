@@ -4,13 +4,12 @@ import { useEffect, useState, useRef } from 'react';
 
 /** Mobile breakpoint */
 const MOBILE_BREAKPOINT = 768;
-/** Zoom level for mobile view */
+/** Zoom level for mobile view when baseZoom not provided */
 const MOBILE_ZOOM = -5;
 
-/** 
+/**
  * 3D Gaussian splat viewer with parallax effect.
- * Uses antimatter15/splat iframe viewer for reliability.
- * Shows splat loading progressively - you can watch it build up as data arrives.
+ * Uses antimatter15/splat iframe viewer; fallback image/video when no splat.
  */
 export function Viewer3D({
   splatUrl,
@@ -38,72 +37,54 @@ export function Viewer3D({
 
   const useSplat = splatUrl && splatUrl.length > 0;
 
-  // Only run on client after mount to avoid hydration mismatch
   useEffect(() => {
     setMounted(true);
-    
     if (useSplat && splatUrl) {
-      // Use local viewer with absolute URL to prevent defaulting to HuggingFace
-      const fullUrl = splatUrl.startsWith('/') 
-        ? `${window.location.origin}${splatUrl}` 
+      const fullUrl = splatUrl.startsWith('/')
+        ? `${window.location.origin}${splatUrl}`
         : splatUrl;
       const search = new URLSearchParams({ url: fullUrl });
-      
-      // Mobile: baseZoom when provided, else MOBILE_ZOOM. Desktop: desktopZoom when provided, else baseZoom ?? -5
       const isMobile = window.innerWidth < MOBILE_BREAKPOINT;
       const effectiveZoom = isMobile
         ? (baseZoom !== undefined ? baseZoom : MOBILE_ZOOM)
         : (desktopZoom !== undefined ? desktopZoom : (baseZoom ?? -5));
-      
       search.set('zoom', String(effectiveZoom));
+      const isDark = document.documentElement.classList.contains('dark');
+      search.set('theme', isDark ? 'dark' : 'light');
       setIframeUrl(`/splat-viewer.html?${search.toString()}`);
     }
   }, [useSplat, splatUrl, baseZoom, desktopZoom]);
 
-  // Pass mouse/touch events to iframe for parallax (desktop and mobile) — only when parallax enabled
+  // Pass mouse/touch to iframe for parallax
   useEffect(() => {
     if (!parallax) return;
-
     const updatePosition = (clientX: number, clientY: number) => {
       const xNorm = clientX / window.innerWidth;
       const yNorm = clientY / window.innerHeight;
       setMousePos({ x: xNorm, y: yNorm });
-
       if (iframeRef.current?.contentWindow) {
         const x = xNorm * 2 - 1;
         const y = yNorm * 2 - 1;
         iframeRef.current.contentWindow.postMessage({ type: 'mouse_move', x, y }, '*');
       }
     };
-
-    const handleMouseMove = (e: MouseEvent) => {
-      updatePosition(e.clientX, e.clientY);
+    const onMouse = (e: MouseEvent) => updatePosition(e.clientX, e.clientY);
+    const onTouch = (e: TouchEvent) => {
+      if (e.touches.length > 0) updatePosition(e.touches[0].clientX, e.touches[0].clientY);
     };
-
-    const handleTouchMove = (e: TouchEvent) => {
-      if (e.touches.length > 0) {
-        updatePosition(e.touches[0].clientX, e.touches[0].clientY);
-      }
+    window.addEventListener('mousemove', onMouse);
+    window.addEventListener('touchmove', onTouch, { passive: true });
+    const onMessage = (e: MessageEvent) => {
+      if (e.data?.type === 'iframe_mouse_move') setMousePos({ x: e.data.x, y: e.data.y });
     };
-
-    const handleIframeMessage = (e: MessageEvent) => {
-      if (e.data?.type === 'iframe_mouse_move') {
-        setMousePos({ x: e.data.x, y: e.data.y });
-      }
-    };
-
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('touchmove', handleTouchMove, { passive: true });
-    window.addEventListener('message', handleIframeMessage);
-
+    window.addEventListener('message', onMessage);
     return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('touchmove', handleTouchMove);
-      window.removeEventListener('message', handleIframeMessage);
+      window.removeEventListener('mousemove', onMouse);
+      window.removeEventListener('touchmove', onTouch);
+      window.removeEventListener('message', onMessage);
     };
   }, [parallax]);
 
-  // Gradient center: fixed when parallax off, subtle movement when on
   const gradX = parallax ? 50 + (mousePos.x - 0.5) * 5 : 50;
   const gradY = parallax ? 60 + (mousePos.y - 0.5) * 5 : 60;
 
@@ -136,10 +117,9 @@ export function Viewer3D({
     );
   }
 
-  // --- Splat viewer: shows progressive loading as data arrives ---
+  // --- Splat viewer: iframe (antimatter15/splat), loads progressively ---
   return (
     <div className={`absolute inset-0 ${compact ? 'bg-transparent' : 'bg-stone-100 dark:bg-stone-900'}`}>
-      {/* Splat iframe — visible immediately, renders progressively as data loads */}
       {mounted && iframeUrl && (
         <iframe
           ref={iframeRef}
@@ -149,8 +129,8 @@ export function Viewer3D({
           allow="accelerometer; gyroscope"
         />
       )}
-      
-      {/* Portal Vignette — skip when compact so home grid is just splat */}
+
+      {/* Vignette — skip when compact so home grid is just splat */}
       {!compact && (
         <>
           <div

@@ -39,3 +39,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# large 3D source files (convert to .splat locally; keep .splat in repo or host elsewhere)
+*.ply
