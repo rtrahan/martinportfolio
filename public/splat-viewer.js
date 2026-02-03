@@ -861,12 +861,21 @@ async function main() {
     gl.vertexAttribIPointer(a_index, 1, gl.INT, false, 0, 0);
     gl.vertexAttribDivisor(a_index, 1);
 
+    // On small viewports (mobile), use wider FOV so the building fits in the frame instead of being cropped
+    const MOBILE_VIEWPORT_MAX_WIDTH = 768;
+    const MOBILE_FOV_SCALE = 0.5; // scale focal down = wider FOV = see more of scene
+
     const resize = () => {
-        gl.uniform2fv(u_focal, new Float32Array([camera.fx, camera.fy]));
+        const isSmallViewport = innerWidth < MOBILE_VIEWPORT_MAX_WIDTH || innerHeight < 450;
+        const fovScale = isSmallViewport ? MOBILE_FOV_SCALE : 1;
+        const efx = camera.fx * fovScale;
+        const efy = camera.fy * fovScale;
+
+        gl.uniform2fv(u_focal, new Float32Array([efx, efy]));
 
         projectionMatrix = getProjectionMatrix(
-            camera.fx,
-            camera.fy,
+            efx,
+            efy,
             innerWidth,
             innerHeight,
         );

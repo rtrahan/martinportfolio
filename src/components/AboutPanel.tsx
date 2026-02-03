@@ -27,14 +27,14 @@ export function AboutPanel({
 }) {
   return (
     <aside
-      className="fixed bottom-0 left-0 right-0 z-20 h-[75vh] md:h-full md:top-0 md:left-auto md:w-[420px] lg:w-[480px] flex flex-col overflow-hidden rounded-t-2xl md:rounded-none bg-stone-100 dark:bg-stone-900 md:bg-transparent"
+      className="relative md:fixed md:bottom-0 left-0 right-0 z-20 flex flex-col rounded-t-2xl md:rounded-none bg-stone-100 dark:bg-stone-900 md:bg-transparent md:top-0 md:left-auto md:w-[420px] lg:w-[480px] md:h-full md:overflow-hidden pb-8 md:pb-0"
       aria-label="About Martin"
       style={{
         ['--tw-bg-opacity' as string]: 1,
       }}
     >
-      {/* Mobile: drag indicator */}
-      <div className="md:hidden flex justify-center pt-3 pb-1">
+      {/* Mobile: sheet drag indicator — sheet scrolls up with page scroll */}
+      <div className="md:hidden flex justify-center pt-3 pb-1 flex-shrink-0">
         <div className="w-10 h-1 rounded-full bg-stone-300 dark:bg-stone-700" />
       </div>
       
@@ -55,7 +55,7 @@ export function AboutPanel({
           ) : null}
         </div>
 
-        <div className="flex-1 overflow-y-auto pr-2 scrollbar-none space-y-8">
+        <div className="flex-1 min-h-0 overflow-visible md:overflow-y-auto pr-2 scrollbar-none space-y-8">
           <p className="font-serif text-base md:text-lg leading-[1.8] text-stone-600 dark:text-stone-300 font-normal tracking-wide">
             {bio}
           </p>

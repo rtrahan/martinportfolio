@@ -4,6 +4,8 @@ import { getProjectBySlug, getProjectSlugs } from '@/lib/projects';
 import { Viewer3D } from '@/components/Viewer3D';
 import { PlanCards } from '@/components/PlanCards';
 import { ProjectNarrativePanel } from '@/components/ProjectNarrativePanel';
+import { SplatPreload } from '@/components/SplatPreload';
+import { DetailPageMobileScroll } from '@/components/DetailPageMobileScroll';
 
 export function generateStaticParams() {
   return getProjectSlugs().map((slug) => ({ slug }));
@@ -20,34 +22,9 @@ export default async function ProjectDetailPage({
 
   return (
     <div className="relative h-screen w-screen overflow-hidden bg-stone-100 dark:bg-stone-900 text-stone-900 dark:text-stone-100">
-      {/* 3D Background Layer — top 25% on mobile, left of panel on desktop */}
-      <div className="absolute top-0 left-0 h-[25vh] md:h-full right-0 md:right-[420px] lg:right-[480px] z-0">
-        <Viewer3D
-          splatUrl={project.splatUrl}
-          fallbackMediaUrl={project.fallbackMediaUrl}
-          parallax={true}
-        />
-        {/* Radial vignette — clear center, solid edges (desktop only) */}
-        <div
-          className="absolute inset-0 pointer-events-none hidden md:block dark:opacity-0"
-          style={{
-            background: 'radial-gradient(ellipse 70% 60% at 50% 50%, transparent 0%, transparent 50%, rgba(245,245,244,0.4) 65%, rgba(245,245,244,0.8) 80%, #f5f5f4 95%, #f5f5f4 100%)',
-          }}
-        />
-        <div
-          className="absolute inset-0 pointer-events-none hidden md:block opacity-0 dark:opacity-100"
-          style={{
-            background: 'radial-gradient(ellipse 70% 60% at 50% 50%, transparent 0%, transparent 50%, rgba(28,25,23,0.4) 65%, rgba(28,25,23,0.8) 80%, #1c1917 95%, #1c1917 100%)',
-          }}
-        />
-        {/* Edge fades — all sides (desktop only) */}
-        <div className="absolute inset-0 pointer-events-none hidden md:block bg-gradient-to-r from-stone-100 dark:from-stone-900 via-transparent to-transparent" style={{ backgroundSize: '30% 100%', backgroundPosition: 'left', backgroundRepeat: 'no-repeat' }} />
-        <div className="absolute inset-0 pointer-events-none hidden md:block bg-gradient-to-l from-stone-100 dark:from-stone-900 via-transparent to-transparent" style={{ backgroundSize: '30% 100%', backgroundPosition: 'right', backgroundRepeat: 'no-repeat' }} />
-        <div className="absolute inset-0 pointer-events-none hidden md:block bg-gradient-to-b from-stone-100 dark:from-stone-900 via-transparent to-transparent" style={{ backgroundSize: '100% 30%', backgroundPosition: 'top', backgroundRepeat: 'no-repeat' }} />
-        <div className="absolute inset-0 pointer-events-none hidden md:block bg-gradient-to-t from-stone-100 dark:from-stone-900 via-transparent to-transparent" style={{ backgroundSize: '100% 30%', backgroundPosition: 'bottom', backgroundRepeat: 'no-repeat' }} />
-      </div>
+      <SplatPreload splatUrl={project.splatUrl} />
 
-      {/* Right blend into panel — extends beyond viewer to panel edge */}
+      {/* Right blend into panel — extends beyond viewer to panel edge (desktop only) */}
       <div
         className="absolute inset-0 z-10 pointer-events-none hidden md:block dark:opacity-0"
         style={{
@@ -63,7 +40,7 @@ export default async function ProjectDetailPage({
         aria-hidden
       />
 
-      {/* Header: Index only (title is in narrative panel) */}
+      {/* Header: Index (fixed on top) */}
       <header className="absolute top-0 left-0 z-20 p-6 md:p-8 pointer-events-none">
         <Link
           href="/"
@@ -76,16 +53,45 @@ export default async function ProjectDetailPage({
         </Link>
       </header>
 
-      {/* Narrative panel — bottom 60% on mobile, right side on desktop */}
-      <ProjectNarrativePanel
-        title={project.title}
-        location={project.location}
-        description={project.description}
-        plans={project.plans}
-      />
+      {/* Mobile: scrollable page with tall image (65vh) + sheet that scrolls up; desktop: fixed layout */}
+      <DetailPageMobileScroll>
+        {/* 3D viewer — tall on mobile (65vh), full on desktop */}
+        <div className="absolute top-0 left-0 min-h-[75vh] h-full md:min-h-0 md:h-full right-0 md:right-[420px] lg:right-[480px] z-0">
+          <Viewer3D
+            splatUrl={project.splatUrl}
+            fallbackMediaUrl={project.fallbackMediaUrl}
+            parallax={true}
+          />
+          {/* Radial vignette — clear center, solid edges (desktop only) */}
+          <div
+            className="absolute inset-0 pointer-events-none hidden md:block dark:opacity-0"
+            style={{
+              background: 'radial-gradient(ellipse 70% 60% at 50% 50%, transparent 0%, transparent 50%, rgba(245,245,244,0.4) 65%, rgba(245,245,244,0.8) 80%, #f5f5f4 95%, #f5f5f4 100%)',
+            }}
+          />
+          <div
+            className="absolute inset-0 pointer-events-none hidden md:block opacity-0 dark:opacity-100"
+            style={{
+              background: 'radial-gradient(ellipse 70% 60% at 50% 50%, transparent 0%, transparent 50%, rgba(28,25,23,0.4) 65%, rgba(28,25,23,0.8) 80%, #1c1917 95%, #1c1917 100%)',
+            }}
+          />
+          {/* Edge fades — all sides (desktop only) */}
+          <div className="absolute inset-0 pointer-events-none hidden md:block bg-gradient-to-r from-stone-100 dark:from-stone-900 via-transparent to-transparent" style={{ backgroundSize: '30% 100%', backgroundPosition: 'left', backgroundRepeat: 'no-repeat' }} />
+          <div className="absolute inset-0 pointer-events-none hidden md:block bg-gradient-to-l from-stone-100 dark:from-stone-900 via-transparent to-transparent" style={{ backgroundSize: '30% 100%', backgroundPosition: 'right', backgroundRepeat: 'no-repeat' }} />
+          <div className="absolute inset-0 pointer-events-none hidden md:block bg-gradient-to-b from-stone-100 dark:from-stone-900 via-transparent to-transparent" style={{ backgroundSize: '100% 30%', backgroundPosition: 'top', backgroundRepeat: 'no-repeat' }} />
+          <div className="absolute inset-0 pointer-events-none hidden md:block bg-gradient-to-t from-stone-100 dark:from-stone-900 via-transparent to-transparent" style={{ backgroundSize: '100% 30%', backgroundPosition: 'bottom', backgroundRepeat: 'no-repeat' }} />
+        </div>
 
-      {/* Plan Cards (Bottom) — left of narrative panel only; hidden on mobile so building is visible */}
-      <main className="absolute bottom-0 left-0 right-0 md:right-[420px] lg:right-[480px] z-20 p-8 hidden md:flex flex-col items-center justify-end pointer-events-none pb-4">
+        <ProjectNarrativePanel
+          title={project.title}
+          location={project.location}
+          description={project.description}
+          plans={project.plans}
+        />
+      </DetailPageMobileScroll>
+
+      {/* Plan Cards (Bottom) — left of narrative panel at lg+ only */}
+      <main className="absolute bottom-0 left-0 right-0 md:right-[420px] lg:right-[480px] z-20 p-8 hidden lg:flex flex-col items-center justify-end pointer-events-none pb-4">
         <div className="pointer-events-auto w-full flex justify-center perspective-container">
           <PlanCards plans={project.plans} />
         </div>
