@@ -57,12 +57,13 @@ export default function AboutPage() {
 
       <DetailPageMobileScroll>
         {/* Portrait splat — tall on mobile (65vh), full on desktop */}
-        <div className="absolute top-0 left-0 min-h-[75vh] h-full md:min-h-0 md:h-full right-0 md:right-[420px] lg:right-[480px] z-0">
+        <div className="absolute top-0 left-0 min-h-[65vh] h-full md:min-h-0 md:h-full right-0 md:right-[420px] lg:right-[480px] z-0">
           <Viewer3D
             splatUrl={profile.splatUrl ?? undefined}
             fallbackMediaUrl={profile.photo ?? undefined}
             parallax={true}
             baseZoom={0}
+            desktopZoom={-5}
           />
           {/* Radial vignette — clear center, solid edges (desktop only) */}
           <div

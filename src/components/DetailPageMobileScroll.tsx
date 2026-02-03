@@ -3,7 +3,7 @@
 import { useRef, useState, useEffect, useCallback } from 'react';
 
 const MOBILE_BREAKPOINT = 768;
-const MOBILE_VIEWER_MIN_HEIGHT = '75vh';
+const MOBILE_VIEWER_MIN_HEIGHT = '65vh';
 const ZOOM_MAX = 0.12; // scale up to 1.12 as user scrolls
 
 /**

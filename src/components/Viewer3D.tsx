@@ -18,6 +18,7 @@ export function Viewer3D({
   compact = false,
   parallax = true,
   baseZoom,
+  desktopZoom,
 }: {
   splatUrl?: string | null;
   fallbackMediaUrl?: string | null;
@@ -25,8 +26,10 @@ export function Viewer3D({
   compact?: boolean;
   /** Disable parallax (e.g. on project detail view) */
   parallax?: boolean;
-  /** Initial zoom for splat viewer (e.g. -10 for home page); passed as ?zoom= to iframe */
+  /** Initial zoom for splat viewer; when set, used for mobile (or both if desktopZoom not set) */
   baseZoom?: number;
+  /** Zoom for desktop only; when set with baseZoom, mobile uses baseZoom and desktop uses this */
+  desktopZoom?: number;
 }) {
   const [mounted, setMounted] = useState(false);
   const [iframeUrl, setIframeUrl] = useState<string | null>(null);
@@ -46,14 +49,16 @@ export function Viewer3D({
         : splatUrl;
       const search = new URLSearchParams({ url: fullUrl });
       
-      // When baseZoom is passed (e.g. project/about), use it for both; otherwise mobile uses MOBILE_ZOOM
+      // Mobile: baseZoom when provided, else MOBILE_ZOOM. Desktop: desktopZoom when provided, else baseZoom ?? -5
       const isMobile = window.innerWidth < MOBILE_BREAKPOINT;
-      const effectiveZoom = baseZoom !== undefined ? baseZoom : (isMobile ? MOBILE_ZOOM : -5);
+      const effectiveZoom = isMobile
+        ? (baseZoom !== undefined ? baseZoom : MOBILE_ZOOM)
+        : (desktopZoom !== undefined ? desktopZoom : (baseZoom ?? -5));
       
       search.set('zoom', String(effectiveZoom));
       setIframeUrl(`/splat-viewer.html?${search.toString()}`);
     }
-  }, [useSplat, splatUrl, baseZoom]);
+  }, [useSplat, splatUrl, baseZoom, desktopZoom]);
 
   // Pass mouse/touch events to iframe for parallax (desktop and mobile) — only when parallax enabled
   useEffect(() => {
