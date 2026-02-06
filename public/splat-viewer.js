@@ -1069,6 +1069,8 @@ async function main() {
     let lastFrame = 0;
     let avgFps = 0;
     let start = 0;
+    let healthCheckFrames = 0;
+    let healthCheckDone = false;
 
     window.addEventListener("gamepadconnected", (e) => {
         const gp = navigator.getGamepads()[e.gamepad.index];
@@ -1202,6 +1204,31 @@ async function main() {
             if (!window._splatLoadedSent) {
                 window._splatLoadedSent = true;
                 window.parent.postMessage({ type: 'splat_loaded' }, '*');
+            }
+            // After ~2s of rendering, run a one-time health check (detect dark/failed render)
+            if (!healthCheckDone && vertexCount > 0) {
+                healthCheckFrames++;
+                if (healthCheckFrames >= 120) {
+                    healthCheckDone = true;
+                    const w = gl.drawingBufferWidth;
+                    const h = gl.drawingBufferHeight;
+                    const size = Math.min(200, Math.floor(w / 2), Math.floor(h / 2));
+                    const x = Math.max(0, Math.floor(w / 2 - size / 2));
+                    const y = Math.max(0, Math.floor(h / 2 - size / 2));
+                    const pixels = new Uint8Array(size * size * 4);
+                    gl.readPixels(x, y, size, size, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+                    let sum = 0;
+                    let count = 0;
+                    for (let i = 0; i < pixels.length; i += 4) {
+                        const r = pixels[i] / 255, g = pixels[i + 1] / 255, b = pixels[i + 2] / 255;
+                        const lum = 0.299 * r + 0.587 * g + 0.114 * b;
+                        sum += lum;
+                        count++;
+                    }
+                    const avgLuminance = count > 0 ? sum / count : 0;
+                    const ok = avgLuminance >= 0.06;
+                    window.parent.postMessage({ type: 'splat_render_health', ok, avgLuminance }, '*');
+                }
             }
         }
         if (fps) fps.innerText = Math.round(avgFps) + " fps";

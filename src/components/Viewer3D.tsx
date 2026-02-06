@@ -32,6 +32,7 @@ export function Viewer3D({
 }) {
   const [mounted, setMounted] = useState(false);
   const [iframeUrl, setIframeUrl] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [mousePos, setMousePos] = useState({ x: 0.5, y: 0.5 });
 
@@ -51,9 +52,26 @@ export function Viewer3D({
       search.set('zoom', String(effectiveZoom));
       const isDark = document.documentElement.classList.contains('dark');
       search.set('theme', isDark ? 'dark' : 'light');
+      if (retryCount > 0) search.set('_retry', String(retryCount));
       setIframeUrl(`/splat-viewer.html?${search.toString()}`);
     }
-  }, [useSplat, splatUrl, baseZoom, desktopZoom]);
+  }, [useSplat, splatUrl, baseZoom, desktopZoom, retryCount]);
+
+  // If the viewer reports a bad render (e.g. dark blob), reload once or twice
+  useEffect(() => {
+    if (!useSplat) return;
+    const onMessage = (e: MessageEvent) => {
+      if (e.data?.type === 'splat_render_health') {
+        if (e.data.ok) {
+          setRetryCount(0);
+        } else if (e.data.ok === false && retryCount < 2) {
+          setRetryCount((r) => r + 1);
+        }
+      }
+    };
+    window.addEventListener('message', onMessage);
+    return () => window.removeEventListener('message', onMessage);
+  }, [useSplat, retryCount]);
 
   // Pass mouse/touch to iframe for parallax
   useEffect(() => {
