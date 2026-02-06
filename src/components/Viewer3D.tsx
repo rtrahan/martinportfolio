@@ -57,21 +57,21 @@ export function Viewer3D({
     }
   }, [useSplat, splatUrl, baseZoom, desktopZoom, retryCount]);
 
-  // If the viewer reports a bad render (e.g. dark blob), reload once or twice
+  // If the viewer reports a bad render (e.g. dark blob), reload up to 2 times
   useEffect(() => {
     if (!useSplat) return;
     const onMessage = (e: MessageEvent) => {
       if (e.data?.type === 'splat_render_health') {
         if (e.data.ok) {
           setRetryCount(0);
-        } else if (e.data.ok === false && retryCount < 2) {
-          setRetryCount((r) => r + 1);
+        } else {
+          setRetryCount((r) => (r >= 2 ? r : r + 1));
         }
       }
     };
     window.addEventListener('message', onMessage);
     return () => window.removeEventListener('message', onMessage);
-  }, [useSplat, retryCount]);
+  }, [useSplat]);
 
   // Pass mouse/touch to iframe for parallax
   useEffect(() => {
@@ -140,6 +140,7 @@ export function Viewer3D({
     <div className={`absolute inset-0 ${compact ? 'bg-transparent' : 'bg-stone-100 dark:bg-stone-900'}`}>
       {mounted && iframeUrl && (
         <iframe
+          key={iframeUrl}
           ref={iframeRef}
           title="3D Gaussian Splat Viewer"
           src={iframeUrl}

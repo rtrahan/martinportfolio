@@ -897,9 +897,11 @@ async function main() {
     window.addEventListener("resize", resize);
     resize();
 
+    let textureReady = false;
     worker.onmessage = (e) => {
         if (e.data.buffer) {
             splatData = new Uint8Array(e.data.buffer);
+            textureReady = false;
             if (e.data.save) {
                 const blob = new Blob([splatData.buffer], {
                     type: "application/octet-stream",
@@ -911,8 +913,8 @@ async function main() {
                 link.click();
             }
         } else if (e.data.texdata) {
+            textureReady = true;
             const { texdata, texwidth, texheight } = e.data;
-            // console.log(texdata)
             gl.bindTexture(gl.TEXTURE_2D, texture);
             gl.texParameteri(
                 gl.TEXTURE_2D,
@@ -940,7 +942,7 @@ async function main() {
             );
             gl.activeTexture(gl.TEXTURE0);
             gl.bindTexture(gl.TEXTURE_2D, texture);
-        } else if (e.data.depthIndex) {
+        } else if (e.data.depthIndex && textureReady) {
             const { depthIndex, viewProj } = e.data;
             gl.bindBuffer(gl.ARRAY_BUFFER, indexBuffer);
             gl.bufferData(gl.ARRAY_BUFFER, depthIndex, gl.DYNAMIC_DRAW);
@@ -1205,10 +1207,10 @@ async function main() {
                 window._splatLoadedSent = true;
                 window.parent.postMessage({ type: 'splat_loaded' }, '*');
             }
-            // After ~2s of rendering, run a one-time health check (detect dark/failed render)
+            // After ~3s of rendering, run a one-time health check (detect dark/failed render)
             if (!healthCheckDone && vertexCount > 0) {
                 healthCheckFrames++;
-                if (healthCheckFrames >= 120) {
+                if (healthCheckFrames >= 180) {
                     healthCheckDone = true;
                     const w = gl.drawingBufferWidth;
                     const h = gl.drawingBufferHeight;
@@ -1218,16 +1220,22 @@ async function main() {
                     const pixels = new Uint8Array(size * size * 4);
                     gl.readPixels(x, y, size, size, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
                     let sum = 0;
+                    let sumSq = 0;
                     let count = 0;
                     for (let i = 0; i < pixels.length; i += 4) {
                         const r = pixels[i] / 255, g = pixels[i + 1] / 255, b = pixels[i + 2] / 255;
                         const lum = 0.299 * r + 0.587 * g + 0.114 * b;
                         sum += lum;
+                        sumSq += lum * lum;
                         count++;
                     }
                     const avgLuminance = count > 0 ? sum / count : 0;
-                    const ok = avgLuminance >= 0.06;
-                    window.parent.postMessage({ type: 'splat_render_health', ok, avgLuminance }, '*');
+                    const variance = count > 0 ? sumSq / count - avgLuminance * avgLuminance : 0;
+                    const lowVariance = variance < 0.015;
+                    const tooDark = avgLuminance < 0.10;
+                    const flatAndDark = avgLuminance < 0.18 && lowVariance;
+                    const ok = !tooDark && !flatAndDark;
+                    window.parent.postMessage({ type: 'splat_render_health', ok, avgLuminance, variance }, '*');
                 }
             }
         }
