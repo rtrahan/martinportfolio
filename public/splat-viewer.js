@@ -1124,15 +1124,15 @@ async function main() {
             updateMouse(e.data.x, e.data.y);
         } else if (e.data && e.data.type === 'device_orientation') {
             // Parent forwards device orientation (gamma/beta) since iframe may be covered
-            targetMx = Math.max(-1, Math.min(1, e.data.gamma / 45));
-            targetMy = Math.max(-1, Math.min(1, e.data.beta / 45));
+            targetMx = Math.max(-1, Math.min(1, e.data.gamma / 20));
+            targetMy = Math.max(-1, Math.min(1, (e.data.beta - 45) / 20));
         }
     });
 
     const onDeviceOrientation = (e) => {
         if (e.beta !== null && e.gamma !== null) {
-            targetMx = Math.max(-1, Math.min(1, e.gamma / 45));
-            targetMy = Math.max(-1, Math.min(1, e.beta / 45));
+            targetMx = Math.max(-1, Math.min(1, e.gamma / 20));
+            targetMy = Math.max(-1, Math.min(1, (e.beta - 45) / 20));
         }
     };
     if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
@@ -1174,11 +1174,14 @@ async function main() {
         camMatrix = rotate4(camMatrix, userOrbitYaw, 0, 1, 0);
         camMatrix = rotate4(camMatrix, userOrbitPitch, 1, 0, 0);
         // Parallax from mouse or deviceorientation (home page + all views)
-        const yaw = mx * 0.03;
-        const pitch = my * 0.03;
+        const isMobile = innerWidth < 768;
+        const rotScale = isMobile ? 0.10 : 0.03;
+        const transScale = isMobile ? 0.18 : 0.06;
+        const yaw = mx * rotScale;
+        const pitch = my * rotScale;
         camMatrix = rotate4(camMatrix, yaw, 0, 1, 0);
         camMatrix = rotate4(camMatrix, -pitch, 1, 0, 0);
-        camMatrix = translate4(camMatrix, mx * 0.06, -my * 0.06, 0);
+        camMatrix = translate4(camMatrix, mx * transScale, -my * transScale, 0);
 
         // 5. Calculate View Matrix
         viewMatrix = invert4(camMatrix);

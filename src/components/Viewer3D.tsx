@@ -105,8 +105,8 @@ export function Viewer3D({
     // Just listen and forward to the iframe for parallax.
     const onOrientation = (e: DeviceOrientationEvent) => {
       if (e.gamma !== null && e.beta !== null) {
-        const x = Math.max(-1, Math.min(1, e.gamma / 30));
-        const y = Math.max(-1, Math.min(1, (e.beta - 45) / 30));
+        const x = Math.max(-1, Math.min(1, e.gamma / 20));
+        const y = Math.max(-1, Math.min(1, (e.beta - 45) / 20));
         setMousePos({ x: 0.5 - x * 0.5, y: 0.5 - y * 0.5 });
         if (iframeRef.current?.contentWindow) {
           iframeRef.current.contentWindow.postMessage({ type: 'device_orientation', gamma: e.gamma, beta: e.beta }, '*');
@@ -132,15 +132,17 @@ export function Viewer3D({
       const isVideo = /\.(mp4|webm|mov)$/i.test(fallbackMediaUrl);
       return (
         <div className={`absolute inset-0 overflow-hidden ${compact ? 'bg-transparent' : 'bg-stone-100 dark:bg-stone-900'}`}>
-           {parallax ? (
-             <ParallaxImage src={fallbackMediaUrl} isVideo={isVideo} />
-           ) : (
-             isVideo ? (
-               <video src={fallbackMediaUrl} autoPlay loop muted playsInline className="w-full h-full object-cover" />
+           <div className="absolute inset-0 overflow-hidden">
+             {parallax ? (
+               <ParallaxImage src={fallbackMediaUrl} isVideo={isVideo} />
              ) : (
-               <img src={fallbackMediaUrl} alt="" className="w-full h-full object-cover" />
-             )
-           )}
+               isVideo ? (
+                 <video src={fallbackMediaUrl} autoPlay loop muted playsInline className="w-full h-full object-cover" />
+               ) : (
+                 <img src={fallbackMediaUrl} alt="" className="w-full h-full object-cover" />
+               )
+             )}
+           </div>
            {!compact && <div className="absolute inset-0 bg-stone-900/20" />}
            <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150 pointer-events-none" />
         </div>
@@ -160,11 +162,11 @@ export function Viewer3D({
   const isVideo = hasFallback && /\.(mp4|webm|mov)$/i.test(fallbackMediaUrl!);
 
   return (
-    <div className={`absolute inset-0 ${compact ? 'bg-transparent' : 'bg-stone-100 dark:bg-stone-900'}`}>
+    <div className={`absolute inset-0 overflow-hidden ${compact ? 'bg-transparent' : 'bg-stone-100 dark:bg-stone-900'}`}>
       {/* Fallback image/video: visible immediately, fades out once splat is ready */}
       {hasFallback && (
         <div
-          className="absolute inset-0 z-10 transition-opacity duration-1000 ease-out"
+          className="absolute inset-0 z-10 overflow-hidden transition-opacity duration-1000 ease-out"
           style={{ opacity: splatReady ? 0 : 1, pointerEvents: splatReady ? 'none' : 'auto' }}
         >
           {parallax ? (
@@ -238,9 +240,11 @@ function ParallaxImage({ src, isVideo }: { src: string; isVideo: boolean }) {
     };
     animationId = requestAnimationFrame(animate);
 
+    const isMobile = window.innerWidth < 768;
+    const intensity = isMobile ? 20 : 8;
     const updateTarget = (x: number, y: number) => {
-      targetX = x * 8;  // Parallax intensity
-      targetY = y * 8;
+      targetX = x * intensity;
+      targetY = y * intensity;
     };
 
     // Mouse movement
@@ -263,8 +267,8 @@ function ParallaxImage({ src, isVideo }: { src: string; isVideo: boolean }) {
     const handleOrientation = (e: DeviceOrientationEvent) => {
       if (e.gamma !== null && e.beta !== null) {
         // gamma: left/right tilt (-90 to 90), beta: front/back tilt (-180 to 180)
-        const x = Math.max(-1, Math.min(1, e.gamma / 30));
-        const y = Math.max(-1, Math.min(1, (e.beta - 45) / 30)); // 45 is "neutral" holding angle
+        const x = Math.max(-1, Math.min(1, e.gamma / 20));
+        const y = Math.max(-1, Math.min(1, (e.beta - 45) / 20));
         updateTarget(-x, -y);
       }
     };
