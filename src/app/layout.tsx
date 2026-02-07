@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Cormorant_Garamond } from "next/font/google";
+import { MotionPermission } from "@/components/MotionPermission";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -47,6 +48,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${cormorant.variable} antialiased bg-stone-100 dark:bg-stone-900 text-stone-900 dark:text-stone-100 selection:bg-orange-200 dark:selection:bg-orange-900`}
       >
+        <MotionPermission />
         {children}
       </body>
     </html>

@@ -33,6 +33,8 @@ export function Viewer3D({
   const [mounted, setMounted] = useState(false);
   const [iframeUrl, setIframeUrl] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
+  /** true once the splat viewer confirms it has rendered correctly */
+  const [splatReady, setSplatReady] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [mousePos, setMousePos] = useState({ x: 0.5, y: 0.5 });
 
@@ -40,6 +42,7 @@ export function Viewer3D({
 
   useEffect(() => {
     setMounted(true);
+    setSplatReady(false);
     if (useSplat && splatUrl) {
       const fullUrl = splatUrl.startsWith('/')
         ? `${window.location.origin}${splatUrl}`
@@ -57,12 +60,13 @@ export function Viewer3D({
     }
   }, [useSplat, splatUrl, baseZoom, desktopZoom, retryCount]);
 
-  // If the viewer reports a bad render (e.g. dark blob), reload up to 2 times
+  // Listen for splat health: show splat on success, retry on failure
   useEffect(() => {
     if (!useSplat) return;
     const onMessage = (e: MessageEvent) => {
       if (e.data?.type === 'splat_render_health') {
         if (e.data.ok) {
+          setSplatReady(true);
           setRetryCount(0);
         } else {
           setRetryCount((r) => (r >= 2 ? r : r + 1));
@@ -73,7 +77,7 @@ export function Viewer3D({
     return () => window.removeEventListener('message', onMessage);
   }, [useSplat]);
 
-  // Pass mouse/touch to iframe for parallax
+  // Pass mouse/touch/device orientation to iframe for parallax
   useEffect(() => {
     if (!parallax) return;
     const updatePosition = (clientX: number, clientY: number) => {
@@ -96,10 +100,26 @@ export function Viewer3D({
       if (e.data?.type === 'iframe_mouse_move') setMousePos({ x: e.data.x, y: e.data.y });
     };
     window.addEventListener('message', onMessage);
+
+    // Device orientation: permission is requested at app startup by MotionPermission.
+    // Just listen and forward to the iframe for parallax.
+    const onOrientation = (e: DeviceOrientationEvent) => {
+      if (e.gamma !== null && e.beta !== null) {
+        const x = Math.max(-1, Math.min(1, e.gamma / 30));
+        const y = Math.max(-1, Math.min(1, (e.beta - 45) / 30));
+        setMousePos({ x: 0.5 - x * 0.5, y: 0.5 - y * 0.5 });
+        if (iframeRef.current?.contentWindow) {
+          iframeRef.current.contentWindow.postMessage({ type: 'device_orientation', gamma: e.gamma, beta: e.beta }, '*');
+        }
+      }
+    };
+    window.addEventListener('deviceorientation', onOrientation);
+
     return () => {
       window.removeEventListener('mousemove', onMouse);
       window.removeEventListener('touchmove', onTouch);
       window.removeEventListener('message', onMessage);
+      window.removeEventListener('deviceorientation', onOrientation);
     };
   }, [parallax]);
 
@@ -135,9 +155,29 @@ export function Viewer3D({
     );
   }
 
-  // --- Splat viewer: iframe (antimatter15/splat), loads progressively ---
+  // --- Splat viewer: show fallback image immediately, load splat behind it, crossfade when ready ---
+  const hasFallback = fallbackMediaUrl && fallbackMediaUrl.length > 0;
+  const isVideo = hasFallback && /\.(mp4|webm|mov)$/i.test(fallbackMediaUrl!);
+
   return (
     <div className={`absolute inset-0 ${compact ? 'bg-transparent' : 'bg-stone-100 dark:bg-stone-900'}`}>
+      {/* Fallback image/video: visible immediately, fades out once splat is ready */}
+      {hasFallback && (
+        <div
+          className="absolute inset-0 z-10 transition-opacity duration-1000 ease-out"
+          style={{ opacity: splatReady ? 0 : 1, pointerEvents: splatReady ? 'none' : 'auto' }}
+        >
+          {parallax ? (
+            <ParallaxImage src={fallbackMediaUrl!} isVideo={!!isVideo} />
+          ) : isVideo ? (
+            <video src={fallbackMediaUrl!} autoPlay loop muted playsInline className="w-full h-full object-cover" />
+          ) : (
+            <img src={fallbackMediaUrl!} alt="" className="w-full h-full object-cover" />
+          )}
+        </div>
+      )}
+
+      {/* Splat iframe: loads in background, becomes visible when fallback fades */}
       {mounted && iframeUrl && (
         <iframe
           key={iframeUrl}

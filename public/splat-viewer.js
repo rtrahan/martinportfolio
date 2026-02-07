@@ -1118,10 +1118,14 @@ async function main() {
         }, '*');
     });
 
-    // Listen for mouse events from parent window
+    // Listen for mouse and device orientation events from parent window
     window.addEventListener('message', e => {
         if (e.data && e.data.type === 'mouse_move') {
             updateMouse(e.data.x, e.data.y);
+        } else if (e.data && e.data.type === 'device_orientation') {
+            // Parent forwards device orientation (gamma/beta) since iframe may be covered
+            targetMx = Math.max(-1, Math.min(1, e.data.gamma / 45));
+            targetMy = Math.max(-1, Math.min(1, e.data.beta / 45));
         }
     });
 
