@@ -9,30 +9,39 @@ import { useEffect } from 'react';
  */
 export function MotionPermission() {
   useEffect(() => {
-    if (
-      typeof DeviceOrientationEvent === 'undefined' ||
-      typeof (DeviceOrientationEvent as unknown as { requestPermission?: () => Promise<string> }).requestPermission !== 'function'
-    ) {
+    const DOE = DeviceOrientationEvent as unknown as {
+      requestPermission?: () => Promise<string>;
+    };
+
+    if (typeof DeviceOrientationEvent === 'undefined' || typeof DOE.requestPermission !== 'function') {
       return; // Not iOS 13+ — no permission needed
     }
 
+    let requested = false;
     const request = async () => {
+      if (requested) return;
+      requested = true;
       try {
-        const perm = await (
-          DeviceOrientationEvent as unknown as { requestPermission: () => Promise<string> }
-        ).requestPermission();
+        const perm = await DOE.requestPermission!();
         if (perm === 'granted') {
-          // Store so other components know permission was granted
           window.__motionPermissionGranted = true;
         }
       } catch {
-        // User denied or error — nothing to do
+        // User denied or error
       }
+      // Clean up all listeners after the first request
+      cleanup();
     };
 
-    // iOS requires the call inside a user-gesture handler
-    window.addEventListener('touchstart', request, { once: true, passive: true });
-    return () => window.removeEventListener('touchstart', request);
+    // iOS requires the call inside a user-gesture handler.
+    // Use both click and touchend for maximum reliability.
+    const cleanup = () => {
+      document.removeEventListener('click', request);
+      document.removeEventListener('touchend', request);
+    };
+    document.addEventListener('click', request, { once: true, passive: true });
+    document.addEventListener('touchend', request, { once: true, passive: true });
+    return cleanup;
   }, []);
 
   return null;

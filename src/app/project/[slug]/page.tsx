@@ -21,7 +21,7 @@ export default async function ProjectDetailPage({
   if (!project) notFound();
 
   return (
-    <div className="relative h-screen w-screen overflow-hidden bg-stone-100 dark:bg-stone-900 text-stone-900 dark:text-stone-100">
+    <div className="relative h-screen w-full overflow-x-hidden overflow-y-hidden bg-stone-100 dark:bg-stone-900 text-stone-900 dark:text-stone-100">
       <SplatPreload splatUrl={project.splatUrl} />
 
       {/* Right blend into panel — extends beyond viewer to panel edge (desktop only) */}
