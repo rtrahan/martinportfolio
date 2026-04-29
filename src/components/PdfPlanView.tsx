@@ -46,15 +46,16 @@ export function PdfPlanView({
 
   if (error) {
     return (
-      <div className="bg-neutral-900 text-white p-8 rounded-lg max-w-md">
-        <p className="text-red-400">{error}</p>
-        <p className="text-sm text-neutral-400 mt-2">
-          Ensure portfolio.pdf is in public/plans/ or use a valid PDF URL.
+      <div className="bg-stone-100 dark:bg-stone-900 text-stone-900 dark:text-white p-8 rounded-md max-w-md border border-stone-200 dark:border-white/10">
+        <p className="font-mono text-xs uppercase tracking-[0.2em] text-stone-500 dark:text-stone-400 mb-3">Error</p>
+        <p className="font-serif text-base text-stone-800 dark:text-stone-200">{error}</p>
+        <p className="text-sm text-stone-500 dark:text-stone-400 mt-3">
+          Ensure the plan PDF exists at the expected path.
         </p>
         <button
           type="button"
           onClick={onClose}
-          className="mt-4 px-4 py-2 bg-white/10 rounded hover:bg-white/20"
+          className="mt-5 px-4 py-2 text-xs font-medium uppercase tracking-[0.2em] text-stone-700 dark:text-white border border-stone-300 dark:border-white/20 rounded-full hover:bg-stone-200 dark:hover:bg-white/5 transition-colors"
         >
           Close
         </button>
@@ -64,43 +65,46 @@ export function PdfPlanView({
 
   if (loading || !pdfUrl) {
     return (
-      <div className="bg-neutral-900 text-white p-8 rounded-lg">
-        <p className="text-neutral-400">Loading PDF…</p>
+      <div className="flex flex-col items-center gap-3">
+        <div className="w-1 h-1 rounded-full bg-stone-500 dark:bg-stone-400 animate-pulse" />
+        <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-stone-500 dark:text-stone-400">
+          Loading plan
+        </p>
       </div>
     );
   }
 
   return (
-    <div ref={containerRef} className="w-full h-full flex flex-col bg-stone-100 dark:bg-black overflow-hidden">
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-50 flex items-center gap-4 py-2 px-4 bg-stone-200/90 dark:bg-stone-900/80 backdrop-blur-md rounded-full border border-stone-300 dark:border-white/10">
-        {numPages > 1 && (
-          <>
-            <button
-              type="button"
-              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-              disabled={currentPage <= 1}
-              className="p-3 md:p-2 text-stone-700 dark:text-white hover:text-stone-900 dark:hover:text-stone-300 disabled:opacity-30 transition-colors"
-            >
-              <svg className="w-5 h-5 md:w-5 md:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-            </button>
-            <span className="text-sm font-mono text-stone-300">
-              {currentPage} / {numPages}
-            </span>
-            <button
-              type="button"
-              onClick={() => setCurrentPage((p) => Math.min(numPages, p + 1))}
-              disabled={currentPage >= numPages}
-              className="p-3 md:p-2 text-stone-700 dark:text-white hover:text-stone-900 dark:hover:text-stone-300 disabled:opacity-30 transition-colors"
-            >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
-          </>
-        )}
-      </div>
+    <div ref={containerRef} className="w-full h-full flex flex-col bg-transparent overflow-hidden">
+      {numPages > 1 && (
+        <div className="absolute bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2 z-50 flex items-center gap-1 py-1.5 px-2 bg-stone-100/85 dark:bg-stone-950/70 backdrop-blur-md rounded-full border border-stone-300/70 dark:border-white/10 shadow-sm">
+          <button
+            type="button"
+            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+            disabled={currentPage <= 1}
+            className="p-2.5 text-stone-700 dark:text-stone-200 hover:text-stone-900 dark:hover:text-white disabled:opacity-30 transition-colors rounded-full"
+            aria-label="Previous page"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <span className="px-2 text-[11px] font-mono tabular uppercase tracking-[0.2em] text-stone-700 dark:text-stone-300">
+            {String(currentPage).padStart(2, '0')} / {String(numPages).padStart(2, '0')}
+          </span>
+          <button
+            type="button"
+            onClick={() => setCurrentPage((p) => Math.min(numPages, p + 1))}
+            disabled={currentPage >= numPages}
+            className="p-2.5 text-stone-700 dark:text-stone-200 hover:text-stone-900 dark:hover:text-white disabled:opacity-30 transition-colors rounded-full"
+            aria-label="Next page"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
+      )}
       <div className="flex-1 min-h-0 relative">
         <TransformWrapper
           initialScale={1}

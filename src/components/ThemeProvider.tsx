@@ -70,26 +70,29 @@ export function useTheme() {
 /** Compact theme override for footer; theme is automatic by device preference by default. */
 export function ThemeToggle() {
   const { theme, toggleTheme, mounted } = useTheme();
-  if (!mounted) return null;
+  if (!mounted) {
+    return <span className="inline-block w-[120px] h-8" aria-hidden />;
+  }
   return (
-    <span className="inline-flex items-center gap-1.5 text-stone-500 dark:text-stone-500">
-      <span className="font-mono text-xs uppercase tracking-widest">Theme</span>
-      <button
-        type="button"
-        onClick={toggleTheme}
-        className="flex items-center justify-center min-w-[32px] min-h-[32px] w-8 h-8 rounded border border-stone-300 dark:border-white/10 bg-stone-100/80 dark:bg-stone-900/50 hover:bg-stone-200 dark:hover:bg-stone-800 text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200 transition-colors touch-manipulation active:scale-95"
-        aria-label={theme === 'dark' ? 'Use light mode' : 'Use dark mode'}
-      >
-        {theme === 'dark' ? (
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-          </svg>
-        ) : (
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-          </svg>
-        )}
-      </button>
-    </span>
+    <button
+      type="button"
+      onClick={toggleTheme}
+      className="group inline-flex items-center gap-2.5 px-3 py-1.5 rounded-full border border-stone-300 dark:border-white/10 bg-stone-100/80 dark:bg-stone-900/40 hover:border-stone-400 dark:hover:border-white/20 hover:bg-stone-200 dark:hover:bg-stone-900/70 transition-colors touch-manipulation active:scale-[0.98]"
+      aria-label={theme === 'dark' ? 'Use light mode' : 'Use dark mode'}
+    >
+      <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-stone-500 dark:text-stone-400 group-hover:text-stone-700 dark:group-hover:text-stone-200 transition-colors">
+        {theme === 'dark' ? 'Dark' : 'Light'}
+      </span>
+      <span aria-hidden className="block w-px h-3 bg-stone-300 dark:bg-white/15" />
+      {theme === 'dark' ? (
+        <svg className="w-3.5 h-3.5 text-stone-500 dark:text-stone-400 group-hover:text-stone-700 dark:group-hover:text-stone-200 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+      ) : (
+        <svg className="w-3.5 h-3.5 text-stone-500 dark:text-stone-400 group-hover:text-stone-700 dark:group-hover:text-stone-200 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+        </svg>
+      )}
+    </button>
   );
 }

@@ -781,9 +781,16 @@ async function main() {
         offset += chunk.length;
     }
 
-    const downsample =
-        splatData.length / rowLength > 500000 ? 1 : 1 / devicePixelRatio;
-    console.log(splatData.length / rowLength, downsample);
+    // Render quality: target the device's actual pixel density so retina screens look sharp.
+    // `downsample` is the inverse of the render scale. canvas.width = innerWidth / downsample.
+    // - downsample = 1     → CSS resolution (looks soft on retina)
+    // - downsample = 0.5   → 2× retina (sharp)
+    // We cap at 2× to keep perf reasonable on 3× iPhones; can be overridden via ?dpr=.
+    const dprParam = parseFloat(params.get("dpr"));
+    const targetDpr = !isNaN(dprParam) && dprParam > 0
+        ? dprParam
+        : Math.min(devicePixelRatio || 1, 2);
+    const downsample = 1 / targetDpr;
 
     const worker = new Worker(
         URL.createObjectURL(

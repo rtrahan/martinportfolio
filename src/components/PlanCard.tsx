@@ -4,13 +4,27 @@ import { useState, useRef, useEffect } from 'react';
 import type { Plan } from '@/types/project';
 import { PlanModal } from './PlanModal';
 
-export function PlanCard({ plan, compact = false }: { plan: Plan; compact?: boolean }) {
+export function PlanCard({
+  plan,
+  compact = false,
+  index,
+  total,
+}: {
+  plan: Plan;
+  compact?: boolean;
+  index?: number;
+  total?: number;
+}) {
   const [modalOpen, setModalOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const [initialRect, setInitialRect] = useState<DOMRect | null>(null);
   const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
+
+  const sheetNumber = typeof index === 'number' ? `PL-${String(index).padStart(2, '0')}` : 'PL-01';
+  const indexStr = typeof index === 'number' ? String(index).padStart(2, '0') : null;
+  const totalStr = typeof total === 'number' ? String(total).padStart(2, '0') : null;
 
   const handleOpen = () => {
     if (cardRef.current) {
@@ -28,20 +42,19 @@ export function PlanCard({ plan, compact = false }: { plan: Plan; compact?: bool
       try {
         const pdfjsLib = await import('pdfjs-dist');
         pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
-        
+
         const fullUrl = plan.src.startsWith('/') ? `${window.location.origin}${plan.src}` : plan.src;
         const loadingTask = pdfjsLib.getDocument(fullUrl);
         const pdf = await loadingTask.promise;
         const page = await pdf.getPage(plan.page || 1);
-        
+
         if (cancelled) return;
-        
+
         const canvas = canvasRef.current;
         if (!canvas) return;
-        
-        // Scale to reasonable thumbnail size
+
         const viewportRaw = page.getViewport({ scale: 1 });
-        const scale = 400 / viewportRaw.width;
+        const scale = 500 / viewportRaw.width;
         const viewport = page.getViewport({ scale });
 
         const context = canvas.getContext('2d');
@@ -49,9 +62,9 @@ export function PlanCard({ plan, compact = false }: { plan: Plan; compact?: bool
 
         canvas.height = viewport.height;
         canvas.width = viewport.width;
-        
+
         await page.render({ canvasContext: context, viewport, canvas }).promise;
-        
+
         if (!cancelled) {
           setThumbnailUrl(canvas.toDataURL());
         }
@@ -59,9 +72,11 @@ export function PlanCard({ plan, compact = false }: { plan: Plan; compact?: bool
         console.error('Thumbnail error', e);
       }
     };
-    
+
     renderThumb();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [plan.src, plan.page]);
 
   // Compact mode: simple flat card for mobile panels
@@ -71,24 +86,28 @@ export function PlanCard({ plan, compact = false }: { plan: Plan; compact?: bool
         <button
           type="button"
           onClick={handleOpen}
-          className="group relative block text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 rounded-lg overflow-hidden"
+          className="group relative block text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 rounded-md overflow-hidden"
           aria-label={plan.label ? `View ${plan.label}` : 'View plan'}
         >
           <div
             ref={cardRef}
-            className="aspect-[4/3] bg-[#f5f5f0] shadow-md rounded-lg overflow-hidden relative"
+            className="aspect-[4/3] bg-[#f5f5f0] dark:bg-stone-800 shadow-sm group-hover:shadow-lg ring-1 ring-stone-300/50 dark:ring-white/10 rounded-md overflow-hidden relative transition-shadow duration-300"
           >
-            {/* PDF Thumbnail */}
-            <canvas 
-              ref={canvasRef} 
-              className="absolute inset-0 w-full h-full object-cover" 
+            <canvas
+              ref={canvasRef}
+              className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
             />
-            
-            {/* Label overlay */}
-            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-3 pt-8">
-              <span className="font-mono text-xs text-white uppercase tracking-wider">
-                {plan.label ?? 'View Plan'}
-              </span>
+            <div className="absolute inset-1.5 border border-stone-900/10 dark:border-white/5 pointer-events-none" />
+
+            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/65 via-black/30 to-transparent p-3 pt-10">
+              <div className="flex items-center justify-between gap-2">
+                <span className="font-mono text-[10px] text-white uppercase tracking-[0.2em] truncate">
+                  {plan.label ?? 'View plan'}
+                </span>
+                <span className="font-mono tabular text-[10px] text-white/70 flex-shrink-0">
+                  {sheetNumber}
+                </span>
+              </div>
             </div>
           </div>
         </button>
@@ -98,6 +117,9 @@ export function PlanCard({ plan, compact = false }: { plan: Plan; compact?: bool
             plan={plan}
             initialRect={initialRect}
             thumbnailUrl={thumbnailUrl}
+            sheetNumber={sheetNumber}
+            indexStr={indexStr}
+            totalStr={totalStr}
             onClose={() => setModalOpen(false)}
           />
         )}
@@ -105,7 +127,7 @@ export function PlanCard({ plan, compact = false }: { plan: Plan; compact?: bool
     );
   }
 
-  // Desktop mode: 3D tilted cards
+  // Desktop mode: gently tilted cards that lift on hover
   return (
     <>
       <button
@@ -113,57 +135,65 @@ export function PlanCard({ plan, compact = false }: { plan: Plan; compact?: bool
         onClick={handleOpen}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
-        className="group relative block text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50 rounded-sm"
+        onFocus={() => setIsHovered(true)}
+        onBlur={() => setIsHovered(false)}
+        className="group relative block text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 dark:focus-visible:ring-white/40 rounded-sm"
         aria-label={plan.label ? `View ${plan.label}` : 'View plan'}
       >
+        {/* Sheet label above card */}
+        <div className="flex items-center justify-between gap-2 mb-2 px-1">
+          <span className="font-mono tabular text-[10px] uppercase tracking-[0.25em] text-stone-500 dark:text-stone-400">
+            {sheetNumber}
+          </span>
+          <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-stone-500 dark:text-stone-400 truncate max-w-[140px]">
+            {plan.label ?? 'Plan'}
+          </span>
+        </div>
+
         <div
           ref={cardRef}
-          className="w-64 h-48 bg-[#f5f5f0] shadow-2xl transition-all duration-500 ease-out origin-center overflow-hidden relative"
+          className="w-56 h-44 lg:w-64 lg:h-48 bg-[#f5f5f0] dark:bg-stone-800 transition-all duration-500 ease-out origin-bottom overflow-hidden relative ring-1 ring-stone-900/10 dark:ring-white/10 rounded-sm"
           style={{
-            transform: isHovered 
-              ? 'perspective(1200px) rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(1.1) translateY(-30px)'
-              : 'perspective(1200px) rotateX(60deg) rotateY(0deg) rotateZ(0deg)',
+            transform: isHovered
+              ? 'perspective(1400px) rotateX(0deg) translateY(-12px) scale(1.04)'
+              : 'perspective(1400px) rotateX(18deg) translateY(0px) scale(1)',
             transformStyle: 'preserve-3d',
             boxShadow: isHovered
-              ? '0 20px 40px rgba(0,0,0,0.3)'
-              : '0 40px 80px -20px rgba(0,0,0,0.6), inset 0 0 40px rgba(0,0,0,0.05)'
+              ? '0 30px 50px -20px rgba(0,0,0,0.45)'
+              : '0 18px 30px -12px rgba(0,0,0,0.35)',
           }}
         >
-          {/* PDF Thumbnail Canvas */}
-          <canvas 
-            ref={canvasRef} 
-            className="absolute inset-0 w-full h-full object-cover opacity-90 mix-blend-multiply" 
+          {/* PDF thumbnail */}
+          <canvas
+            ref={canvasRef}
+            className="absolute inset-0 w-full h-full object-cover"
           />
 
-          {/* Card Content - Blueprint Style Overlay */}
-          <div className="absolute inset-2 border-2 border-stone-900/10 flex flex-col justify-between p-4 z-10">
-            <div className="flex justify-between items-start opacity-60">
-              <span className="font-mono text-[0.6rem] uppercase tracking-widest text-stone-900 bg-white/50 px-1">
-                PROJ-2026
-              </span>
-              <span className="font-mono text-[0.6rem] uppercase tracking-widest text-stone-900 bg-white/50 px-1">
-                SH-01
-              </span>
-            </div>
+          {/* Drafting border */}
+          <div className="absolute inset-1.5 border border-stone-900/15 pointer-events-none" />
 
-            <div className="flex flex-col items-center justify-center flex-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-               <span className="font-serif text-lg text-stone-900 italic bg-white/80 px-2 py-1 backdrop-blur-sm rounded">
-                {plan.label ?? 'View Plan'}
-              </span>
-            </div>
+          {/* Top-right tab number */}
+          <div className="absolute top-2 right-2 px-1.5 py-0.5 bg-white/80 dark:bg-stone-900/70 backdrop-blur-sm">
+            <span className="font-mono tabular text-[9px] uppercase tracking-[0.2em] text-stone-700 dark:text-stone-200">
+              {indexStr}/{totalStr}
+            </span>
+          </div>
 
-            <div className="border-t border-stone-900/20 pt-2 flex justify-between items-end opacity-80">
-               <span className="font-mono text-[0.5rem] uppercase text-stone-600 bg-white/50 px-1">
-                Scale: N.T.S.
+          {/* Hover label overlay */}
+          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/55 via-black/20 to-transparent p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <div className="flex items-center justify-between gap-2">
+              <span className="font-serif text-base text-white italic truncate">
+                {plan.label ?? 'View plan'}
               </span>
-               <span className="font-mono text-[0.5rem] uppercase text-stone-600 bg-white/50 px-1">
-                MBR Design
-              </span>
+              <span aria-hidden className="block w-5 h-px bg-white/70 flex-shrink-0" />
             </div>
           </div>
-          
-          {/* Paper sheen/gradient */}
-          <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent pointer-events-none z-20" />
+
+          {/* Paper sheen */}
+          <div
+            className="absolute inset-0 bg-gradient-to-br from-white/15 to-transparent pointer-events-none"
+            style={{ mixBlendMode: 'overlay' }}
+          />
         </div>
       </button>
 
@@ -172,6 +202,9 @@ export function PlanCard({ plan, compact = false }: { plan: Plan; compact?: bool
           plan={plan}
           initialRect={initialRect}
           thumbnailUrl={thumbnailUrl}
+          sheetNumber={sheetNumber}
+          indexStr={indexStr}
+          totalStr={totalStr}
           onClose={() => setModalOpen(false)}
         />
       )}

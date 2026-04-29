@@ -13,6 +13,11 @@
   --vignette-from: rgba(245, 245, 244, 0.9);
   --vignette-to: rgba(245, 245, 244, 0.4);
   --card-portal: 245, 245, 244;
+  /* Hairline + drafting grid colors */
+  --hairline: rgba(28, 25, 23, 0.12);
+  --hairline-strong: rgba(28, 25, 23, 0.22);
+  --grid-line: rgba(28, 25, 23, 0.06);
+  --accent: #b45309; /* amber-700, the drafted-pencil orange */
 }
 
 .dark {
@@ -24,6 +29,10 @@
   --vignette-from: rgba(28, 25, 23, 0.9);
   --vignette-to: rgba(28, 25, 23, 0.4);
   --card-portal: 28, 25, 23;
+  --hairline: rgba(255, 255, 255, 0.08);
+  --hairline-strong: rgba(255, 255, 255, 0.18);
+  --grid-line: rgba(255, 255, 255, 0.04);
+  --accent: #f59e0b; /* amber-500 in dark */
 }
 
 @theme inline {
@@ -43,10 +52,84 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), sans-serif;
+  font-feature-settings: "kern", "liga", "calt", "ss01";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-serif), serif;
+  font-feature-settings: "kern", "liga", "dlig", "ss01";
+}
+
+/* Tabular numerals for project numbers, years, etc. */
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Editorial Drop Cap — only renders on first paragraph after .has-dropcap */
+.has-dropcap > p:first-of-type::first-letter {
+  font-family: var(--font-serif), serif;
+  float: left;
+  font-size: 4.25rem;
+  line-height: 0.85;
+  padding-right: 0.6rem;
+  padding-top: 0.35rem;
+  font-weight: 400;
+  font-style: normal;
+  color: var(--foreground);
+}
+@media (min-width: 768px) {
+  .has-dropcap > p:first-of-type::first-letter {
+    font-size: 5.25rem;
+    padding-right: 0.75rem;
+  }
+}
+
+/* Hairline rule — uses border-color so it adapts to theme */
+.hairline {
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    var(--hairline-strong) 12%,
+    var(--hairline-strong) 88%,
+    transparent 100%
+  );
+  height: 1px;
+  width: 100%;
+}
+.hairline-flat {
+  background: var(--hairline);
+  height: 1px;
+  width: 100%;
+}
+
+/* Drafting paper grid — extremely subtle background pattern */
+.drafting-grid {
+  background-image:
+    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+  background-size: 32px 32px;
+  background-position: -1px -1px;
+}
+.drafting-grid-fine {
+  background-image:
+    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+  background-size: 8px 8px;
+  background-position: -1px -1px;
+}
+
+/* Subtle film grain — for warmth */
+.grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.45 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  opacity: 0.04;
+  mix-blend-mode: overlay;
 }
 
 /* Custom Scrollbar */
@@ -69,4 +152,49 @@ h1, h2, h3, h4, h5, h6 {
 }
 .dark ::-webkit-scrollbar-thumb:hover {
   background: #57534e;
+}
+
+/* Quietly hide scrollbars when not desired */
+.scrollbar-none {
+  scrollbar-width: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+/* Soft fade-in/up for editorial entries */
+@keyframes editorial-rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.rise {
+  animation: editorial-rise 900ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.rise-delay-1 { animation-delay: 80ms; }
+.rise-delay-2 { animation-delay: 160ms; }
+.rise-delay-3 { animation-delay: 240ms; }
+.rise-delay-4 { animation-delay: 320ms; }
+.rise-delay-5 { animation-delay: 400ms; }
+.rise-delay-6 { animation-delay: 480ms; }
+.rise-delay-7 { animation-delay: 560ms; }
+
+@media (prefers-reduced-motion: reduce) {
+  .rise {
+    animation: none;
+  }
+}
+
+/* Selection */
+::selection {
+  background: rgba(180, 83, 9, 0.20); /* amber-700 / accent */
+  color: inherit;
+}
+.dark ::selection {
+  background: rgba(245, 158, 11, 0.30);
 }

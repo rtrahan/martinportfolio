@@ -3,7 +3,6 @@ import profileData from '@/data/profile.json';
 import type { ProfileData } from '@/components/ProfileHero';
 import { AboutPanel } from '@/components/AboutPanel';
 import { Viewer3D } from '@/components/Viewer3D';
-import { SplatPreload } from '@/components/SplatPreload';
 import { DetailPageMobileScroll } from '@/components/DetailPageMobileScroll';
 
 export default function AboutPage() {
@@ -15,31 +14,31 @@ export default function AboutPage() {
 
   return (
     <div className="relative h-screen w-full overflow-x-hidden overflow-y-hidden bg-stone-100 dark:bg-stone-900 text-stone-900 dark:text-stone-100">
-      <SplatPreload splatUrl={profile.splatUrl ?? undefined} />
-
       {/* Right blend into panel (desktop only) */}
       <div
         className="absolute inset-0 z-10 pointer-events-none hidden md:block dark:opacity-0"
         style={{
-          background: 'linear-gradient(to right, transparent 0%, transparent 40%, rgba(245,245,244,0.5) 50%, #f5f5f4 60%, #f5f5f4 100%)',
+          background:
+            'linear-gradient(to right, transparent 0%, transparent 40%, rgba(245,245,244,0.5) 50%, #f5f5f4 60%, #f5f5f4 100%)',
         }}
         aria-hidden
       />
       <div
         className="absolute inset-0 z-10 pointer-events-none hidden md:block opacity-0 dark:opacity-100"
         style={{
-          background: 'linear-gradient(to right, transparent 0%, transparent 40%, rgba(28,25,23,0.5) 50%, #1c1917 60%, #1c1917 100%)',
+          background:
+            'linear-gradient(to right, transparent 0%, transparent 40%, rgba(28,25,23,0.5) 50%, #1c1917 60%, #1c1917 100%)',
         }}
         aria-hidden
       />
 
-      <header className="absolute top-0 left-0 z-20 p-6 md:p-8 pointer-events-none">
+      <header className="absolute top-0 left-0 z-20 p-5 md:p-7 pointer-events-none">
         <Link
           href="/"
-          className="pointer-events-auto group flex items-center text-sm font-medium tracking-widest uppercase text-stone-600 dark:text-white/60 hover:text-stone-900 dark:hover:text-white transition-colors bg-stone-200/80 dark:bg-stone-950/30 backdrop-blur-sm px-4 py-2 rounded-full border border-stone-300 dark:border-white/5 hover:border-stone-400 dark:hover:border-white/20"
+          className="pointer-events-auto group inline-flex items-center gap-3 text-[10px] sm:text-xs font-medium tracking-[0.25em] uppercase text-stone-700 dark:text-white/70 hover:text-stone-900 dark:hover:text-white transition-colors bg-stone-200/70 dark:bg-stone-950/40 backdrop-blur-md px-4 py-2.5 rounded-full border border-stone-300/80 dark:border-white/10 hover:border-stone-400 dark:hover:border-white/20"
         >
           <svg
-            className="w-4 h-4 mr-2 transform group-hover:-translate-x-1 transition-transform"
+            className="w-3.5 h-3.5 transform group-hover:-translate-x-1 transition-transform"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -68,20 +67,33 @@ export default function AboutPage() {
           <div
             className="absolute inset-0 pointer-events-none hidden md:block dark:opacity-0"
             style={{
-              background: 'radial-gradient(ellipse 70% 60% at 50% 50%, transparent 0%, transparent 50%, rgba(245,245,244,0.4) 65%, rgba(245,245,244,0.8) 80%, #f5f5f4 95%, #f5f5f4 100%)',
+              background:
+                'radial-gradient(ellipse 70% 60% at 50% 50%, transparent 0%, transparent 50%, rgba(245,245,244,0.4) 65%, rgba(245,245,244,0.8) 80%, #f5f5f4 95%, #f5f5f4 100%)',
             }}
           />
           <div
             className="absolute inset-0 pointer-events-none hidden md:block opacity-0 dark:opacity-100"
             style={{
-              background: 'radial-gradient(ellipse 70% 60% at 50% 50%, transparent 0%, transparent 50%, rgba(28,25,23,0.4) 65%, rgba(28,25,23,0.8) 80%, #1c1917 95%, #1c1917 100%)',
+              background:
+                'radial-gradient(ellipse 70% 60% at 50% 50%, transparent 0%, transparent 50%, rgba(28,25,23,0.4) 65%, rgba(28,25,23,0.8) 80%, #1c1917 95%, #1c1917 100%)',
             }}
           />
-          {/* Edge fades — all sides (desktop only) */}
-          <div className="absolute inset-0 pointer-events-none hidden md:block bg-gradient-to-r from-stone-100 dark:from-stone-900 via-transparent to-transparent" style={{ backgroundSize: '30% 100%', backgroundPosition: 'left', backgroundRepeat: 'no-repeat' }} />
-          <div className="absolute inset-0 pointer-events-none hidden md:block bg-gradient-to-l from-stone-100 dark:from-stone-900 via-transparent to-transparent" style={{ backgroundSize: '30% 100%', backgroundPosition: 'right', backgroundRepeat: 'no-repeat' }} />
-          <div className="absolute inset-0 pointer-events-none hidden md:block bg-gradient-to-b from-stone-100 dark:from-stone-900 via-transparent to-transparent" style={{ backgroundSize: '100% 30%', backgroundPosition: 'top', backgroundRepeat: 'no-repeat' }} />
-          <div className="absolute inset-0 pointer-events-none hidden md:block bg-gradient-to-t from-stone-100 dark:from-stone-900 via-transparent to-transparent" style={{ backgroundSize: '100% 30%', backgroundPosition: 'bottom', backgroundRepeat: 'no-repeat' }} />
+          <div
+            className="absolute inset-0 pointer-events-none hidden md:block bg-gradient-to-r from-stone-100 dark:from-stone-900 via-transparent to-transparent"
+            style={{ backgroundSize: '30% 100%', backgroundPosition: 'left', backgroundRepeat: 'no-repeat' }}
+          />
+          <div
+            className="absolute inset-0 pointer-events-none hidden md:block bg-gradient-to-l from-stone-100 dark:from-stone-900 via-transparent to-transparent"
+            style={{ backgroundSize: '30% 100%', backgroundPosition: 'right', backgroundRepeat: 'no-repeat' }}
+          />
+          <div
+            className="absolute inset-0 pointer-events-none hidden md:block bg-gradient-to-b from-stone-100 dark:from-stone-900 via-transparent to-transparent"
+            style={{ backgroundSize: '100% 30%', backgroundPosition: 'top', backgroundRepeat: 'no-repeat' }}
+          />
+          <div
+            className="absolute inset-0 pointer-events-none hidden md:block bg-gradient-to-t from-stone-100 dark:from-stone-900 via-transparent to-transparent"
+            style={{ backgroundSize: '100% 30%', backgroundPosition: 'bottom', backgroundRepeat: 'no-repeat' }}
+          />
         </div>
 
         <AboutPanel

@@ -6,6 +6,8 @@ import { useEffect, useState, useRef } from 'react';
 const MOBILE_BREAKPOINT = 768;
 /** Zoom level for mobile view when baseZoom not provided */
 const MOBILE_ZOOM = -5;
+/** Bump when re-exporting splats so browsers fetch the new file. */
+const SPLAT_VERSION = 1;
 
 /**
  * 3D Gaussian splat viewer with parallax effect.
@@ -44,8 +46,13 @@ export function Viewer3D({
     setMounted(true);
     setSplatReady(false);
     if (useSplat && splatUrl) {
+      // Stable version query string serves two purposes:
+      // 1. Invalidates any partial/corrupt cache entries from previous loads.
+      // 2. Lets us bump the version when we re-export splats and want to
+      //    force browsers to fetch the new file. The server still sets a long
+      //    Cache-Control max-age, so each `?v=N` is cached for a year.
       const fullUrl = splatUrl.startsWith('/')
-        ? `${window.location.origin}${splatUrl}`
+        ? `${window.location.origin}${splatUrl}?v=${SPLAT_VERSION}`
         : splatUrl;
       const search = new URLSearchParams({ url: fullUrl });
       const isMobile = window.innerWidth < MOBILE_BREAKPOINT;
